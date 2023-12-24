@@ -53,6 +53,7 @@ class LevelSelection(MainMenu):
 class Game:
     def __init__(self):
         pygame.init()
+        pygame.mixer.init()
         with open("bin/setup.pkl", "rb") as file:
             self.settings = pickle.load(file)
 
