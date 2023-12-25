@@ -5,7 +5,7 @@ SETUP = {"SCREEN_RESOLUTION": (1280, 720),
              "SCREEN_FLAGS": pygame.SHOWN,
              "FPS_CAP": 60,
              "PLAYFIELD_DIMENSIONS": (640,480),
-             "COLOR_DEPTH": 32
+             "PLAYFIELD_MARGIN": 100
             }
 
 if __name__ == "__main__":
