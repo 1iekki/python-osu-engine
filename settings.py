@@ -1,11 +1,11 @@
 import pickle
 import pygame
 
-SETUP = {"SCREEN_RESOLUTION": (1280, 720),
-             "SCREEN_FLAGS": pygame.SHOWN,
+SETUP = {"SCREEN_RESOLUTION": (1920, 1080),
+             "SCREEN_FLAGS": pygame.FULLSCREEN,
              "FPS_CAP": 60,
              "PLAYFIELD_DIMENSIONS": (640,480),
-             "PLAYFIELD_MARGIN": 100
+             "PLAYFIELD_MARGIN": 60
             }
 
 if __name__ == "__main__":

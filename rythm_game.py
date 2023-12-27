@@ -50,8 +50,9 @@ class PlayMap:
         self.clock = clock
         self.fpsCap = fpsCap
         self.map = None
-        self.HitObjects = None
+        self.hitObjects = None
         self.music = None
+        self.circleSize = None
         self.rendered = 0
         self.ogPlayField = playField
         self.scale_factor = (self.window.h - margin) / float(playField[1])
@@ -60,15 +61,28 @@ class PlayMap:
         self.pos_x = int(self.window.center[0] 
                          - (self.playField[0] / 2))
         self.pos_y = int(self.window.center[1] 
-                         - (self.playField[1] / 2))
-        
+                         - (self.playField[1] / 2))        
+        self.hitQueue = []
+
 
     def set_map(self, map: parser.Beatmap):
         self.map = map
         self.hitObjects = map.get_hitobjects()
         self.music = map.get_audio()
+        
+        size = self.map.circleSize * self.scale_factor
+        self.circleSize = (size * 2, size * 2)        
+        self.hitCircleIMG = pygame.transform.scale(
+            pygame.image.load("images/hitcircle.png"),
+            self.circleSize)
+        self.approachCircle = pygame.transform.scale(
+            pygame.image.load("images/approachcircle.png"),
+            self.circleSize)
+
 
     def run(self):
+        pygame.draw.rect(self.screen, (255,255,255), ((self.pos_x, self.pos_y), (self.playField)))
+        
         pygame.mixer.music.load(self.music)
         pygame.mixer.music.play()
         pygame.mixer.music.set_pos(0)
@@ -76,22 +90,26 @@ class PlayMap:
             self.render_hitobjects()
             self.get_inputs()
             self.eval_hits()
-            # print(pygame.mixer.music.get_pos())
-            # pygame.draw.rect(self.screen, (255,255,255), (self.pos_x,self.pos_y,self.playField[0],self.playField[1]))
             pygame.display.flip()
     
     def render_hitobjects(self):
         if self.rendered < len(self.hitObjects):
-            print(pygame.mixer.music.get_pos())
-            hitTime = self.hitObjects[self.rendered].time
+            hitTime = self.hitObjects[self.rendered].showTime
             musicTime = pygame.mixer.music.get_pos()
             if hitTime <= musicTime:
                 x = self.hitObjects[self.rendered].x * self.scale_factor
                 y = self.hitObjects[self.rendered].y * self.scale_factor
                 x += self.pos_x
                 y += self.pos_y
-                pygame.draw.circle(self.screen, (255,255,255), (x,y), 20)
+
+                img = self.hitCircleIMG
+                img_box = self.hitCircleIMG.get_rect()
+                img_box.center = (x, y)
+                self.screen.blit(img, img_box)              
                 self.rendered += 1
+                self.hitQueue.append(self.hitObjects[self.rendered])
+        for hit in self.hitQueue:
+            if hit.showTime - hitTime > hit.fadeIn:
                 
 
     def get_inputs(self):

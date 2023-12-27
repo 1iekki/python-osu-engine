@@ -1,8 +1,19 @@
 import os
 
 class HitObject:
-    def __init__(self, objDef: str):
-        params = [int(e) if e.isdigit() else e for e in objDef.split(',')]
+   
+
+    def __init__(self, description: str, difficulty: dict):
+
+        # constants
+        PREEMPT = 1200
+        LOW_AR_PREEMPT = 600
+        HIGH_AR_PREEMPT = 750
+        FADE_IN = 800
+        LOW_AR_FADE = 400
+        HIGH_AR_FADE = 500
+        
+        params = [int(e) if e.isdigit() else e for e in description.split(',')]
         self.x = params[0]
         self.y = params[1]
         self.time = params[2]
@@ -16,7 +27,20 @@ class HitObject:
         self.sliderCurvePoints = []
         self.slides = 0
         self.sliderLength = 0
-        #params[5] is objectparams
+        
+        AR = float(difficulty["ApproachRate"])
+        if AR < 5:
+            self.preempt = int(PREEMPT + (LOW_AR_PREEMPT * (5 - AR) / 5))
+            self.fadeIn = int(FADE_IN + (LOW_AR_FADE * (5 - AR) / 5))
+        elif AR == 5:
+            self.preempt = int(PREEMPT)
+            self.fadeIn = int(FADE_IN)
+        elif AR > 5:
+            self.preempt = int(PREEMPT - (HIGH_AR_PREEMPT * (AR - 5) / 5))
+            self.fadeIn = int(FADE_IN - (HIGH_AR_FADE * (AR - 5) / 5))
+
+        self.showTime = self.time - self.preempt
+
         if self.type['SLIDER']:
             match params[5][0]:
                 case 'B':
@@ -36,12 +60,21 @@ class HitObject:
 
 class Beatmap:
     def __init__(self, dir: str, name: str):
+
+        # constants
+        CIRCLE_SIZE = 55
+        CIRCLE_SCALE = 4
+
         self.dir = dir
         self.name = name
         with open(f"{dir}/{name}") as file:
             lines = file.readlines()
             self.generalData = self.get_data("[General]\n", lines)
             self.metadata = self.get_data("[Metadata]\n", lines)
+            self.difficulty = self.get_data("[Difficulty]\n", lines)
+                
+        CS = float(self.difficulty['CircleSize'])
+        self.circleSize = CIRCLE_SIZE - CIRCLE_SCALE * CS
 
     def get_data(self, what: str, where: list) -> dict:
         d ={}
@@ -57,8 +90,8 @@ class Beatmap:
         with open(f"{self.dir}/{self.name}") as file:
             lines = file.readlines()
             id = lines.index("[HitObjects]\n")
-            for x in lines[id+1:]:
-                hit.append(HitObject(x))
+            for desc in lines[id+1:]:
+                hit.append(HitObject(desc, self.difficulty))
         return hit
     
     def get_audio(self) -> str:
