@@ -50,9 +50,8 @@ class PlayMap:
         self.fpsCap = fpsCap
         self.map = None
         self.hitObjects = None
-        self.music = None
         self.circleSize = None
-        self.rendered = 0
+        self.music = None
         self.ogPlayField = playField
         self.scale_factor = (self.window.h - margin) / float(playField[1])
         self.playField = (int(playField[0]*self.scale_factor),
@@ -63,11 +62,14 @@ class PlayMap:
                          - (self.playField[1] / 2))        
         self.hitQueue = []
         self.comboBreak = True
-        self.combo = 0
+        self.combo = 1
         self.score = 0
+        self.rendered = 0
+        self.clickTime = 0
         self.clicked = {"INPUT_KEY_1": False, "INPUT_KEY_2": False}
         self.controls = {"INPUT_KEY_1": settings["INPUT_KEY_1"], "INPUT_KEY_2": settings["INPUT_KEY_2"]}
-        self.clickTime = 0
+        self.soundChannel = pygame.mixer.Channel(0)
+
 
     def set_map(self, map: parser.Beatmap):
         self.map = map
@@ -88,9 +90,21 @@ class PlayMap:
         while pygame.mixer.music.get_busy():
             self.render_hitobjects()
             self.get_inputs()
-            self.eval_hits()
+            self.show_score()
             pygame.display.flip()
     
+    def show_score(self):
+        score_font = pygame.font.Font('freesansbold.ttf', 48)
+        score_text = score_font.render(str(self.score), True, pygame.color.Color("White"))
+        score_box = score_text.get_rect()
+        score_box.centerx = self.window.centerx
+        score_box.top = self.window.top + 8
+        combo_text = score_font.render(str(self.combo) + "X", True, pygame.color.Color("White"))
+        combo_box = score_text.get_rect()
+        combo_box.bottomleft = self.window.bottomleft
+        self.screen.blit(score_text, score_box)
+        self.screen.blit(combo_text, combo_box)
+
     def render_hitobjects(self):
         if self.rendered < len(self.hitObjects):
             hitTime = self.hitObjects[self.rendered].showTime
@@ -100,43 +114,49 @@ class PlayMap:
                 self.rendered += 1
 
         self.screen.fill(pygame.Color("Black"))
-        for index, hit in enumerate(self.hitQueue):
-            if musicTime >= hit.showTime + hit.preempt:
+        queue = reversed(self.hitQueue)
+        for hit in queue:
+            if musicTime >= hit.showTime + hit.preempt + hit.hitWindow['50']:
                 self.hitQueue.remove(hit)
+                self.combo = 1
                 continue 
-            
-            if index in range(1, len(self.hitQueue)):
-                pass
-            
-            if hit.type ['HITCIRCLE']:
-                x = hit.x * self.scale_factor
-                y = hit.y * self.scale_factor
-                x += self.pos_x
-                y += self.pos_y
-                x = int(x)
-                y = int(y)
 
-                relTime = musicTime - hit.showTime
-                
-                opacity = relTime/float(hit.fadeIn)
-                opacity = 255 if opacity > 1.0 else int(255*opacity)
+            # if hit.type ['HITCIRCLE']:
+            x = hit.x * self.scale_factor
+            y = hit.y * self.scale_factor
+            x += self.pos_x
+            y += self.pos_y
+            x = int(x)
+            y = int(y)
 
-                ac_size = relTime/float(hit.preempt)
-                size = self.circleSize[0]
-                ac_size = self.circleSize if ac_size >= 1.0 \
-                else (int((2.0 - ac_size) * size), int((2.0 - ac_size) * size))
-                ac = pygame.transform.scale(self.approachCircle, ac_size)
-                ac.convert_alpha()
-                ac.set_alpha(opacity)
-                ac_box = ac.get_rect()
-                ac_box.center = (x, y)
-                img = pygame.transform.scale(self.hitCircleIMG, self.circleSize)
-                img.convert_alpha()
-                img.set_alpha(opacity)
-                img_box = img.get_rect()
-                img_box.center = (x, y)
-                self.screen.blit(img, img_box)
-                self.screen.blit(ac, ac_box)
+            relTime = musicTime - hit.showTime
+            fadeIN = relTime/float(hit.fadeIn)
+            fadeOUT = (relTime - hit.preempt) \
+                / float(hit.hitWindow['50'])
+
+            if relTime < hit.preempt:
+                opacity = 255 if fadeIN > 1.0 else int(255*fadeIN)
+            else:
+                opacity = int(255 - 255 * fadeOUT)               
+
+            ac_size = relTime/float(hit.preempt)
+            size = self.circleSize[0]
+            ac_size = self.circleSize if ac_size >= 1.0 \
+                else (int((2.0 - ac_size) * size),
+                        int((2.0 - ac_size) * size))
+            ac = pygame.transform.scale(self.approachCircle, ac_size)
+            ac.convert_alpha()
+            ac.set_alpha(opacity)
+            ac_box = ac.get_rect()
+            ac_box.center = (x, y)
+            img = pygame.transform.scale(self.hitCircleIMG, self.circleSize)
+            img.convert_alpha()
+            img.set_alpha(opacity)
+            img_box = img.get_rect()
+            img_box.center = (x, y)
+            self.screen.blit(img, img_box)
+            self.screen.blit(ac, ac_box)
+            hit.hitbox = img_box
                 
 
     def get_inputs(self):
@@ -152,18 +172,69 @@ class PlayMap:
                     if self.clicked["INPUT_KEY_1"] == False:
                         self.clickTime = pygame.mixer.music.get_pos()
                         self.clicked["INPUT_KEY_1"] = True
+                        scored = self.eval_hits()
+                        if scored == -1: continue
+                        if self.comboBreak:
+                            self.combo = 1
+                        else:
+                            self.combo += 1
+                        self.score += self.combo * scored
                 if event.key == self.controls["INPUT_KEY_2"]:
                     if self.clicked["INPUT_KEY_2"] == False:
                         self.clickTime = pygame.mixer.music.get_pos()
                         self.clicked["INPUT_KEY_2"] = True
+                        scored = self.eval_hits()
+                        if scored == 0:
+                            if scored == -1: continue
+                            self.combo = 1
+                            self.score += self.combo * scored
             if event.type == pygame.KEYUP:
                 self.clicked["INPUT_KEY_1"] = False
-                self.clicked["INPUT_KEY_1"] = False
+                self.clicked["INPUT_KEY_2"] = False
 
 
-    def eval_hits(self):
-        pass
-
+    def eval_hits(self) -> int:
+        musicTime = pygame.mixer.music.get_pos()
+        cursorPos = pygame.mouse.get_pos()
+        if len(self.hitQueue) < 1:
+            return -1
+        hit = self.hitQueue[0]
+        collision = hit.hitbox.collidepoint(cursorPos)
+        if collision:
+            if musicTime < hit.time - hit.hitWindow['50']:
+                self.comboBreak = True
+                self.hitQueue.pop(0)
+                return 0
+            if musicTime > hit.time - hit.hitWindow['50'] \
+                and musicTime < hit.time - hit.hitWindow['100']:
+                self.comboBreak = False
+                self.hitQueue.pop(0)
+                return 50
+            if musicTime > hit.time - hit.hitWindow['100'] \
+                and musicTime < hit.time - hit.hitWindow['300']:
+                self.comboBreak = False
+                self.hitQueue.pop(0)
+                return 100
+            if musicTime > hit.time - hit.hitWindow['300'] \
+                and musicTime < hit.time + hit.hitWindow['300']:
+                self.comboBreak = False
+                self.hitQueue.pop(0)
+                return 300
+            if musicTime > hit.time + hit.hitWindow['300'] \
+                and musicTime < hit.time + hit.hitWindow['100']:
+                self.comboBreak = False
+                self.hitQueue.pop(0)
+                return 100
+            if musicTime > hit.time + hit.hitWindow['100'] \
+                and musicTime < hit.time + hit.hitWindow['50']:
+                self.comboBreak = False
+                self.hitQueue.pop(0)
+                return 50
+            if musicTime > hit.time + hit.hitWindow['50']:
+                self.comboBreak = True
+                self.hitQueue.pop(0)
+                return 0
+        return -1
 class LevelSelection:
     def __init__(self, screen: pygame.Surface, 
                  gameState: GameStateManager, playMap: PlayMap):
@@ -186,13 +257,14 @@ class LevelSelection:
                     pygame.quit()
                     sys.exit()
                 if event.key == pygame.K_c:
-                    self.playMap.set_map(self.beatmaps[1])
+                    self.playMap.set_map(self.beatmaps[0])
                     self.gameState.set_state("PlayMap")
 
 class Game:
     def __init__(self):
         pygame.init()
         pygame.mixer.init()
+        pygame.mixer.set_num_channels(2)
         with open("bin/setup.pkl", "rb") as file:
             self.settings = pickle.load(file)
 

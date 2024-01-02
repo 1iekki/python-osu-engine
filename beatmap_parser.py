@@ -40,6 +40,7 @@ class HitObject:
             self.fadeIn = int(FADE_IN - (HIGH_AR_FADE * (AR - 5) / 5))
 
         self.showTime = self.time - self.preempt
+        self.hitbox = None
 
         if self.type['SLIDER']:
             match params[5][0]:
