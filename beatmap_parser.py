@@ -58,6 +58,12 @@ class HitObject:
             else:
                 self.sliderLength = int(float(params[7].strip()))
 
+        self.OD = float(difficulty['OverallDifficulty'])
+        self.hitWindow = {'300': int(80 - 6 * self.OD),
+                          '100': int(140 - 8 * self.OD),
+                          '50': int(200 - 10 * self.OD)
+                          }
+
 class Beatmap:
     def __init__(self, dir: str, name: str):
 
@@ -67,12 +73,14 @@ class Beatmap:
 
         self.dir = dir
         self.name = name
-        with open(f"{dir}/{name}") as file:
-            lines = file.readlines()
-            self.generalData = self.get_data("[General]\n", lines)
-            self.metadata = self.get_data("[Metadata]\n", lines)
-            self.difficulty = self.get_data("[Difficulty]\n", lines)
-                
+        with open(f"{dir}/{name}", mode = 'r', encoding='utf_8') as file:
+            try:
+                lines = file.readlines()
+                self.generalData = self.get_data("[General]\n", lines)
+                self.metadata = self.get_data("[Metadata]\n", lines)
+                self.difficulty = self.get_data("[Difficulty]\n", lines)
+            except:
+                pass    
         CS = float(self.difficulty['CircleSize'])
         self.circleSize = CIRCLE_SIZE - CIRCLE_SCALE * CS
 
@@ -87,7 +95,7 @@ class Beatmap:
 
     def get_hitobjects(self) -> list:
         hit = []
-        with open(f"{self.dir}/{self.name}") as file:
+        with open(f"{self.dir}/{self.name}", mode='r', encoding='utf_8') as file:
             lines = file.readlines()
             id = lines.index("[HitObjects]\n")
             for desc in lines[id+1:]:

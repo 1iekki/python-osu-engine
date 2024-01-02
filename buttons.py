@@ -1,5 +1,5 @@
 '''
-This is a library for the game Missionaries and Cannibals
+This is a library for the game Click!
 This library contains button object and methods for event handling
 
 Made by Eryk Dudkiewicz
