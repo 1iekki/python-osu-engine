@@ -3,6 +3,16 @@ import pickle
 import sys
 import beatmap_parser as parser
 
+class Cursor:
+    def __init__(self, screen):
+        self.cursor_img = pygame.image.load("images/cursor.png")
+        self.cursor_box = self.cursor_img.get_rect()
+        self.screen = screen
+
+    def update(self):
+        self.cursor_box.center = pygame.mouse.get_pos()
+        self.screen.blit(self.cursor_img, self.cursor_box)        
+
 class GameStateManager:
     def __init__(self, *, state="MainMenu"):
         self.state = state
@@ -38,7 +48,8 @@ class PlayMap:
     def __init__(self, screen: pygame.surface,
                  gameState: GameStateManager, 
                  clock: pygame.time.Clock,
-                 settings: dict):
+                 settings: dict,
+                 cursor: Cursor):
         
         playField = settings["PLAYFIELD_DIMENSIONS"]
         fpsCap = settings["FPS_CAP"]
@@ -68,7 +79,13 @@ class PlayMap:
         self.clickTime = 0
         self.clicked = {"INPUT_KEY_1": False, "INPUT_KEY_2": False}
         self.controls = {"INPUT_KEY_1": settings["INPUT_KEY_1"], "INPUT_KEY_2": settings["INPUT_KEY_2"]}
+        self.cursor = cursor
         self.soundChannel = pygame.mixer.Channel(0)
+        self.hit50 = 0
+        self.hit100 = 0
+        self.hit300 = 0
+        self.miss = 0
+        self.all = 0
 
 
     def set_map(self, map: parser.Beatmap):
@@ -91,19 +108,32 @@ class PlayMap:
             self.render_hitobjects()
             self.get_inputs()
             self.show_score()
+            self.cursor.update()
             pygame.display.flip()
     
     def show_score(self):
         score_font = pygame.font.Font('freesansbold.ttf', 48)
-        score_text = score_font.render(str(self.score), True, pygame.color.Color("White"))
+        score_text = score_font.render(f"{self.score}", True, pygame.color.Color("White"))
         score_box = score_text.get_rect()
         score_box.centerx = self.window.centerx
         score_box.top = self.window.top + 8
-        combo_text = score_font.render(str(self.combo) + "X", True, pygame.color.Color("White"))
+        
+        combo_text = score_font.render(f"{self.combo}X", True, pygame.color.Color("White"))
         combo_box = score_text.get_rect()
         combo_box.bottomleft = self.window.bottomleft
+
+        acc = 0 if self.all == 0 \
+                else (self.hit300 * 3 
+                      + self.hit100 * 2 
+                      + self.hit50) / self.all * 100
+
+        acc_text = score_font.render(f"{acc:.2f}%", True, pygame.color.Color("White"))
+        acc_box = acc_text.get_rect()
+        acc_box.topright = self.window.topright
+        
         self.screen.blit(score_text, score_box)
         self.screen.blit(combo_text, combo_box)
+        self.screen.blit(acc_text, acc_box)
 
     def render_hitobjects(self):
         if self.rendered < len(self.hitObjects):
@@ -118,6 +148,8 @@ class PlayMap:
         for hit in queue:
             if musicTime >= hit.showTime + hit.preempt + hit.hitWindow['50']:
                 self.hitQueue.remove(hit)
+                self.miss += 1
+                self.all += 3
                 self.combo = 1
                 continue 
 
@@ -144,12 +176,12 @@ class PlayMap:
             ac_size = self.circleSize if ac_size >= 1.0 \
                 else (int((2.0 - ac_size) * size),
                         int((2.0 - ac_size) * size))
-            ac = pygame.transform.scale(self.approachCircle, ac_size)
+            ac = pygame.transform.smoothscale(self.approachCircle, ac_size)
             ac.convert_alpha()
             ac.set_alpha(opacity)
             ac_box = ac.get_rect()
             ac_box.center = (x, y)
-            img = pygame.transform.scale(self.hitCircleIMG, self.circleSize)
+            img = pygame.transform.smoothscale(self.hitCircleIMG, self.circleSize)
             img.convert_alpha()
             img.set_alpha(opacity)
             img_box = img.get_rect()
@@ -204,35 +236,49 @@ class PlayMap:
             if musicTime < hit.time - hit.hitWindow['50']:
                 self.comboBreak = True
                 self.hitQueue.pop(0)
+                self.all += 3
+                self.miss += 1
                 return 0
             if musicTime > hit.time - hit.hitWindow['50'] \
                 and musicTime < hit.time - hit.hitWindow['100']:
                 self.comboBreak = False
                 self.hitQueue.pop(0)
+                self.all += 3
+                self.hit50 += 1
                 return 50
             if musicTime > hit.time - hit.hitWindow['100'] \
                 and musicTime < hit.time - hit.hitWindow['300']:
                 self.comboBreak = False
                 self.hitQueue.pop(0)
+                self.all += 3
+                self.hit100 += 1
                 return 100
             if musicTime > hit.time - hit.hitWindow['300'] \
                 and musicTime < hit.time + hit.hitWindow['300']:
                 self.comboBreak = False
                 self.hitQueue.pop(0)
+                self.all += 3
+                self.hit300 += 1
                 return 300
             if musicTime > hit.time + hit.hitWindow['300'] \
                 and musicTime < hit.time + hit.hitWindow['100']:
                 self.comboBreak = False
                 self.hitQueue.pop(0)
+                self.all += 3
+                self.hit100 += 1
                 return 100
             if musicTime > hit.time + hit.hitWindow['100'] \
                 and musicTime < hit.time + hit.hitWindow['50']:
                 self.comboBreak = False
                 self.hitQueue.pop(0)
+                self.all += 3
+                self.hit50 += 1
                 return 50
             if musicTime > hit.time + hit.hitWindow['50']:
                 self.comboBreak = True
                 self.hitQueue.pop(0)
+                self.all += 3
+                self.miss += 1
                 return 0
         return -1
 class LevelSelection:
@@ -257,7 +303,7 @@ class LevelSelection:
                     pygame.quit()
                     sys.exit()
                 if event.key == pygame.K_c:
-                    self.playMap.set_map(self.beatmaps[0])
+                    self.playMap.set_map(self.beatmaps[2])
                     self.gameState.set_state("PlayMap")
 
 class Game:
@@ -265,6 +311,7 @@ class Game:
         pygame.init()
         pygame.mixer.init()
         pygame.mixer.set_num_channels(2)
+        pygame.mouse.set_visible(False)
         with open("bin/setup.pkl", "rb") as file:
             self.settings = pickle.load(file)
 
@@ -275,11 +322,13 @@ class Game:
         )
         self.fpsCap = self.settings["FPS_CAP"]
         
+        self.cursor = Cursor(self.screen)
         self.clock = pygame.time.Clock()
         self.gameState = GameStateManager()
         self.mainMenu = MainMenu(self.screen, self.gameState) 
         self.playMap = PlayMap(self.screen, self.gameState,
-                               self.clock, self.settings)
+                               self.clock, self.settings,
+                               self.cursor)
         self.levelSelection = LevelSelection(self.screen,
                                              self.gameState, self.playMap)
 
@@ -296,6 +345,7 @@ class Game:
 
             currentState = self.STATES[self.gameState.get_state()]            
             currentState.run()
+            self.cursor.update()
             pygame.display.flip()
             self.clock.tick(self.fpsCap)
 

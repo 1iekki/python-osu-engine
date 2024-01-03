@@ -1,2 +1,2 @@
 
-        pygame.mixer.music.load(self.music)
+            hitTime = self.hitObjects[self.rendered].showTime
