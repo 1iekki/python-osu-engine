@@ -2,6 +2,7 @@ import pygame
 import pickle
 import sys
 import beatmap_parser as parser
+from bezier import Curve
 
 class Cursor:
     def __init__(self, screen):
@@ -86,6 +87,8 @@ class PlayMap:
         self.hit300 = 0
         self.miss = 0
         self.all = 0
+        self.hitnormal = pygame.mixer.Sound("hitsounds/normal-hitnormal.wav")
+        self.soundChannel.set_volume(0.3)
 
 
     def set_map(self, map: parser.Beatmap):
@@ -104,6 +107,7 @@ class PlayMap:
         pygame.mixer.music.load(self.music)
         pygame.mixer.music.play()
         pygame.mixer.music.set_pos(0)
+        pygame.mixer.music.set_volume(0.1)
         while pygame.mixer.music.get_busy():
             self.render_hitobjects()
             self.get_inputs()
@@ -146,49 +150,103 @@ class PlayMap:
         self.screen.fill(pygame.Color("Black"))
         queue = reversed(self.hitQueue)
         for hit in queue:
-            if musicTime >= hit.showTime + hit.preempt + hit.hitWindow['50']:
-                self.hitQueue.remove(hit)
-                self.miss += 1
-                self.all += 3
-                self.combo = 1
-                continue 
+            musicTime = pygame.mixer.music.get_pos()
+            if hit.type ['HITCIRCLE']:
+                if musicTime >= hit.showTime + hit.preempt + hit.hitWindow['50']:
+                    self.hitQueue.remove(hit)
+                    self.miss += 1
+                    self.all += 3
+                    self.combo = 1
+                    continue 
 
-            # if hit.type ['HITCIRCLE']:
-            x = hit.x * self.scale_factor
-            y = hit.y * self.scale_factor
-            x += self.pos_x
-            y += self.pos_y
-            x = int(x)
-            y = int(y)
+                x = hit.x * self.scale_factor
+                y = hit.y * self.scale_factor
+                x += self.pos_x
+                y += self.pos_y
+                x = int(x)
+                y = int(y)
 
-            relTime = musicTime - hit.showTime
-            fadeIN = relTime/float(hit.fadeIn)
-            fadeOUT = (relTime - hit.preempt) \
-                / float(hit.hitWindow['50'])
+                relTime = musicTime - hit.showTime
+                fadeIN = relTime/float(hit.fadeIn)
+                fadeOUT = (relTime - hit.preempt) \
+                    / float(hit.hitWindow['50'])
 
-            if relTime < hit.preempt:
-                opacity = 255 if fadeIN > 1.0 else int(255*fadeIN)
-            else:
-                opacity = int(255 - 255 * fadeOUT)               
+                if relTime < hit.preempt:
+                    opacity = 255 if fadeIN > 1.0 else int(255*fadeIN)
+                else:
+                    opacity = int(255 - 255 * fadeOUT)               
 
-            ac_size = relTime/float(hit.preempt)
-            size = self.circleSize[0]
-            ac_size = self.circleSize if ac_size >= 1.0 \
-                else (int((2.0 - ac_size) * size),
-                        int((2.0 - ac_size) * size))
-            ac = pygame.transform.smoothscale(self.approachCircle, ac_size)
-            ac.convert_alpha()
-            ac.set_alpha(opacity)
-            ac_box = ac.get_rect()
-            ac_box.center = (x, y)
-            img = pygame.transform.smoothscale(self.hitCircleIMG, self.circleSize)
-            img.convert_alpha()
-            img.set_alpha(opacity)
-            img_box = img.get_rect()
-            img_box.center = (x, y)
-            self.screen.blit(img, img_box)
-            self.screen.blit(ac, ac_box)
-            hit.hitbox = img_box
+                ac_size = relTime/float(hit.preempt)
+                size = self.circleSize[0]
+                ac_size = self.circleSize if ac_size >= 1.0 \
+                    else (int((2.0 - ac_size) * size),
+                            int((2.0 - ac_size) * size))
+                ac = pygame.transform.smoothscale(self.approachCircle, ac_size)
+                ac.convert_alpha()
+                ac.set_alpha(opacity)
+                ac_box = ac.get_rect()
+                ac_box.center = (x, y)
+                img = pygame.transform.smoothscale(self.hitCircleIMG, self.circleSize)
+                img.convert_alpha()
+                img.set_alpha(opacity)
+                img_box = img.get_rect()
+                img_box.center = (x, y)
+                self.screen.blit(img, img_box)
+                self.screen.blit(ac, ac_box)
+                hit.hitbox = img_box
+
+            if hit.type['SLIDER'] is True:
+                if musicTime >= hit.showTime + hit.preempt + hit.hitWindow['50'] + hit.sliderTime:
+                    self.hitQueue.remove(hit)
+                    self.miss += 1
+                    self.all += 3
+                    self.combo = 1
+                    continue 
+
+                if musicTime >= hit.showTime + hit.preempt:
+                    pass
+                # tbc
+
+                if hit.sliderType == 'B':
+                    x = hit.x * self.scale_factor
+                    y = hit.y * self.scale_factor
+                    x += self.pos_x
+                    y += self.pos_y
+                    x = int(x)
+                    y = int(y)
+
+                    relTime = musicTime - hit.showTime
+                    fadeIN = relTime/float(hit.fadeIn)
+                    fadeOUT = (relTime - hit.preempt) \
+                        / float(hit.hitWindow['50'])
+
+                    if relTime < hit.preempt:
+                        opacity = 255 if fadeIN > 1.0 else int(255*fadeIN)
+                    else:
+                        opacity = int(255 - 255 * fadeOUT)               
+
+                    ac_size = relTime/float(hit.preempt)
+                    size = self.circleSize[0]
+                    ac_size = self.circleSize if ac_size >= 1.0 \
+                        else (int((2.0 - ac_size) * size),
+                                int((2.0 - ac_size) * size))
+                    ac = pygame.transform.smoothscale(self.approachCircle, ac_size)
+                    ac.convert_alpha()
+                    ac.set_alpha(opacity)
+                    ac_box = ac.get_rect()
+                    ac_box.center = (x, y)
+                    img = pygame.transform.smoothscale(self.hitCircleIMG, self.circleSize)
+                    img.convert_alpha()
+                    img.set_alpha(opacity)
+                    img_box = img.get_rect()
+                    img_box.center = (x, y)
+                    self.screen.blit(img, img_box)
+                    self.screen.blit(ac, ac_box)
+                    hit.hitbox = img_box
+
+                    hit.curve = Curve(hit.sliderCurvePoints)
+                    pygame.draw.lines(self.screen, pygame.Color("White"), False, hit.curve.place_curve(self.scale_factor, self.pos_x, self.pos_y))
+
                 
 
     def get_inputs(self):
@@ -236,6 +294,7 @@ class PlayMap:
             if musicTime < hit.time - hit.hitWindow['50']:
                 self.comboBreak = True
                 self.hitQueue.pop(0)
+                self.soundChannel.play(self.hitnormal)
                 self.all += 3
                 self.miss += 1
                 return 0
@@ -243,6 +302,7 @@ class PlayMap:
                 and musicTime < hit.time - hit.hitWindow['100']:
                 self.comboBreak = False
                 self.hitQueue.pop(0)
+                self.soundChannel.play(self.hitnormal)
                 self.all += 3
                 self.hit50 += 1
                 return 50
@@ -250,6 +310,7 @@ class PlayMap:
                 and musicTime < hit.time - hit.hitWindow['300']:
                 self.comboBreak = False
                 self.hitQueue.pop(0)
+                self.soundChannel.play(self.hitnormal)
                 self.all += 3
                 self.hit100 += 1
                 return 100
@@ -257,6 +318,7 @@ class PlayMap:
                 and musicTime < hit.time + hit.hitWindow['300']:
                 self.comboBreak = False
                 self.hitQueue.pop(0)
+                self.soundChannel.play(self.hitnormal)
                 self.all += 3
                 self.hit300 += 1
                 return 300
@@ -264,6 +326,7 @@ class PlayMap:
                 and musicTime < hit.time + hit.hitWindow['100']:
                 self.comboBreak = False
                 self.hitQueue.pop(0)
+                self.soundChannel.play(self.hitnormal)
                 self.all += 3
                 self.hit100 += 1
                 return 100
@@ -271,12 +334,14 @@ class PlayMap:
                 and musicTime < hit.time + hit.hitWindow['50']:
                 self.comboBreak = False
                 self.hitQueue.pop(0)
+                self.soundChannel.play(self.hitnormal)
                 self.all += 3
                 self.hit50 += 1
                 return 50
             if musicTime > hit.time + hit.hitWindow['50']:
                 self.comboBreak = True
                 self.hitQueue.pop(0)
+                self.soundChannel.play(self.hitnormal)
                 self.all += 3
                 self.miss += 1
                 return 0
@@ -303,7 +368,7 @@ class LevelSelection:
                     pygame.quit()
                     sys.exit()
                 if event.key == pygame.K_c:
-                    self.playMap.set_map(self.beatmaps[2])
+                    self.playMap.set_map(self.beatmaps[0])
                     self.gameState.set_state("PlayMap")
 
 class Game:

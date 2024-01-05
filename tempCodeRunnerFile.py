@@ -1,2 +1,4 @@
-
-            hitTime = self.hitObjects[self.rendered].showTime
+ 136,236,8364,2,0,B,1,675
+    points = [(69,259),(42,89),(42,89),(207,140),(337,56),(337,56),(360,205),(264,216)]
+    pygame.init()
+    x = Curve(points)
