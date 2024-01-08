@@ -1,3 +1,4 @@
+from modules.curves import Curve
 class HitObject:
    
 
@@ -14,7 +15,7 @@ class HitObject:
         params = [int(e) if e.isdigit() else e for e in description.split(',')]
         self.x = params[0]
         self.y = params[1]
-        self.time = params[2]
+        self.hitTime = int(params[2])
         t = format(params[3], '#07b')
         self.type = {'HITCIRCLE': bool(int(t[-1])),
                      'SLIDER': bool(int(t[-2])),
@@ -26,6 +27,7 @@ class HitObject:
         self.slides = 0
         self.sliderLength = 0
         self.sliderTime = 0
+        self.sliderRuns = False
         
         AR = float(difficulty["ApproachRate"])
         if AR < 5:
@@ -38,11 +40,22 @@ class HitObject:
             self.preempt = int(PREEMPT - (HIGH_AR_PREEMPT * (AR - 5) / 5))
             self.fadeIn = int(FADE_IN - (HIGH_AR_FADE * (AR - 5) / 5))
 
-        self.showTime = self.time - self.preempt
+        self.showTime = self.hitTime - self.preempt
         self.hitbox = None
         self.curve = None
+        self.curvePath = None
+        self.curvePointer = 0
+        self.curvePathCount = 0
 
         if self.type['SLIDER']:
+            for x in params[5][2:].split('|'):
+                i = 0
+                b = [0, 0]
+                for y in x.split(':'):
+                    b[i] = int(y)
+                    i += 1
+                self.sliderCurvePoints.append(b)
+            
             match params[5][0]:
                 case 'B':
                     self.sliderType = 'B' # bezier
@@ -52,14 +65,6 @@ class HitObject:
                     self.sliderType = 'L' # linear
                 case 'P':
                     self.sliderType = 'P' # perfect circle
-            for x in params[5][2:].split('|'):
-                i = 0
-                b = [0, 0]
-                for y in x.split(':'):
-                    b[i] = int(y)
-                    i += 1
-                self.sliderCurvePoints.append(b)
-            # self.sliderCurvePoints = ([x.split(':') for x in params[5][2:].split('|')])
             
             self.slides = params[6]
             if type(params[7]) == int:
@@ -68,11 +73,39 @@ class HitObject:
                 self.sliderLength = int(float(params[7].strip()))
 
             SV = 1
-            self.sliderTime = self.sliderLength / (int(difficulty['SliderMultiplier']) * 100 * SV) * beatLength
+            self.sliderTime = self.sliderLength / (int(difficulty['SliderMultiplier']) * 100 * SV) * beatLength * 1000
 
         OD = float(difficulty['OverallDifficulty'])
         self.hitWindow = {'300': int(80 - 6 * OD),
                           '100': int(140 - 8 * OD),
                           '50': int(200 - 10 * OD)
                           }
+
+    def get_slider_path(self) -> list:
+        return self.curvePath
+
+    def generate_slider_path(self, scale_factor, posx, posy):
+        self.curve = Curve(self.sliderCurvePoints)
+        self.curvePath = self.curve.get_bezier_path(scale_factor, posx, posy)
+        self.curvePathCount = len(self.curvePath)
+
+    def advance_slider(self, Time) -> bool:
+
+        # i need absolute time, calc the SV by checking the timing points
+        # inverse multiplier n0 * 1/n1
+        # but i would need to check like 100+ poitns each tick
+        # maybe optimise?
+
+        if self.type["SLIDER"] is False:
+            return -1 # NOT A SLIDER
+        next_point = int(step * self.curvePathCount)
+        if next_point + 1 >= self.curvePathCount:
+            self.curvePointer = self.curvePathCount - 1
+            return 0 # END OF SLIDER
+        self.curvePointer = next_point
+        return 1 # OK
+
+    def get_slider_phase(self) -> list:
+        return self.curvePath[self.curvePointer]
+
 

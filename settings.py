@@ -3,7 +3,7 @@ import pygame
 
 SETUP = {"SCREEN_RESOLUTION": (1920, 1080),
              "SCREEN_FLAGS": pygame.SHOWN,
-             "FPS_CAP": 60,
+             "FPS_CAP": 1000,
              "PLAYFIELD_DIMENSIONS": (640,480),
              "PLAYFIELD_MARGIN": 60,
              "INPUT_KEY_1": pygame.K_s,

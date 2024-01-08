@@ -44,7 +44,7 @@ class Beatmap:
             lines = file.readlines()
             id = lines.index("[HitObjects]\n")
             for desc in lines[id+1:]:
-                hit.append(HitObject(desc, self.difficulty, self.timingPoints[0][2]))
+                hit.append(HitObject(desc, self.difficulty, float(self.timingPoints[0][2])))
         return hit
     
     def get_audio(self) -> str:

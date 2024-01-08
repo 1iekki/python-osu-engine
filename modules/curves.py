@@ -20,13 +20,13 @@ def bezier_point(control_points, t):
 class Curve:
     def __init__(self, 
                  control_points: list,
-                 divisions: int = 50) -> None:
+                 divisions: int = 60) -> None:
         self.CTPoints = control_points
         self.divisions = divisions
         self.points = []
         
   
-    def place_curve(self, scale_factor, pos_x, pos_y) -> list:
+    def get_bezier_path(self, scale_factor, pos_x, pos_y) -> list:
         for point in self.CTPoints:
             x = point[0] * scale_factor
             y = point[1] * scale_factor
@@ -46,7 +46,7 @@ def main():
 
     points = [complex(69,259),complex(42,89),complex(42,89),complex(207,140),complex(337,56),complex(337,56),complex(360,205),complex(264,216)]
     pygame.init()
-    x = bezier_curve(points, 50)
+    x = bezier_curve(points, 10)
     print(x)
 
 if __name__ == "__main__":

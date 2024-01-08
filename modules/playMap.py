@@ -61,8 +61,13 @@ class PlayMap:
         self.approachCircle = pygame.image.load("images/approachcircle.png")
 
     def run(self):
+
+        #init hitobjects
+        for hit in self.hitObjects:
+            if hit.type['SLIDER'] is True:
+                hit.generate_slider_path(self.scale_factor, self.pos_x, self.pos_y)
+
         pygame.draw.rect(self.screen, (255,255,255), ((self.pos_x, self.pos_y), (self.playField)))
-        
         pygame.mixer.music.load(self.music)
         pygame.mixer.music.play()
         pygame.mixer.music.set_pos(0)
@@ -109,8 +114,9 @@ class PlayMap:
         self.screen.fill(pygame.Color("Black"))
         queue = reversed(self.hitQueue)
         for hit in queue:
-                musicTime = pygame.mixer.music.get_pos()
-            # if hit.type ['HITCIRCLE']:
+            musicTime = pygame.mixer.music.get_pos()
+            if hit.type ['HITCIRCLE'] is True:
+
                 if musicTime >= hit.showTime + hit.preempt + hit.hitWindow['50']:
                     self.hitQueue.remove(hit)
                     self.miss += 1
@@ -154,59 +160,59 @@ class PlayMap:
                 self.screen.blit(ac, ac_box)
                 hit.hitbox = img_box
 
-            # if hit.type['SLIDER'] is True:
-            #     if musicTime >= hit.showTime + hit.preempt + hit.hitWindow['50'] + hit.sliderTime:
-            #         self.hitQueue.remove(hit)
-            #         self.miss += 1
-            #         self.all += 3
-            #         self.combo = 1
-            #         continue 
+            
+            if hit.type['SLIDER'] is True:
 
-            #     if musicTime >= hit.showTime + hit.preempt:
-            #         pass
-            #     # tbc
+                if musicTime >= hit.hitTime:
+                    hit.sliderRuns = True
 
-            #     if hit.sliderType == 'B':
-            #         x = hit.x * self.scale_factor
-            #         y = hit.y * self.scale_factor
-            #         x += self.pos_x
-            #         y += self.pos_y
-            #         x = int(x)
-            #         y = int(y)
+                if hit.sliderRuns is True:
+                    control = hit.advance_slider(musicTime)
 
-            #         relTime = musicTime - hit.showTime
-            #         fadeIN = relTime/float(hit.fadeIn)
-            #         fadeOUT = (relTime - hit.preempt) \
-            #             / float(hit.hitWindow['50'])
+                    if control == 1:
+                        # eval hit 
+                        (new_x, new_y) = hit.get_slider_phase()
+                        pygame.draw.lines(self.screen, pygame.Color("White"), False, hit.get_slider_path())
+                        img = pygame.transform.smoothscale(self.hitCircleIMG, self.circleSize)
+                        img.convert_alpha()
+                        img_box = img.get_rect()
+                        img_box.center = (new_x, new_y)
+                        self.screen.blit(img, img_box)
+                        hit.hitbox = img_box
+                    if control == 0:
+                        self.hitQueue.remove(hit)
+                else:
+                    x = hit.x * self.scale_factor
+                    y = hit.y * self.scale_factor
+                    x += self.pos_x
+                    y += self.pos_y
+                    x = int(x)
+                    y = int(y)
 
-            #         if relTime < hit.preempt:
-            #             opacity = 255 if fadeIN > 1.0 else int(255*fadeIN)
-            #         else:
-            #             opacity = int(255 - 255 * fadeOUT)               
+                    relTime = musicTime - hit.showTime
+                    fadeIN = relTime/float(hit.fadeIn)
 
-            #         ac_size = relTime/float(hit.preempt)
-            #         size = self.circleSize[0]
-            #         ac_size = self.circleSize if ac_size >= 1.0 \
-            #             else (int((2.0 - ac_size) * size),
-            #                     int((2.0 - ac_size) * size))
-            #         ac = pygame.transform.smoothscale(self.approachCircle, ac_size)
-            #         ac.convert_alpha()
-            #         ac.set_alpha(opacity)
-            #         ac_box = ac.get_rect()
-            #         ac_box.center = (x, y)
-            #         img = pygame.transform.smoothscale(self.hitCircleIMG, self.circleSize)
-            #         img.convert_alpha()
-            #         img.set_alpha(opacity)
-            #         img_box = img.get_rect()
-            #         img_box.center = (x, y)
-            #         self.screen.blit(img, img_box)
-            #         self.screen.blit(ac, ac_box)
-            #         hit.hitbox = img_box
+                    opacity = 255 if fadeIN > 1.0 else int(255*fadeIN)          
 
-            #         hit.curve = Curve(hit.sliderCurvePoints)
-            #         pygame.draw.lines(self.screen, pygame.Color("White"), False, hit.curve.place_curve(self.scale_factor, self.pos_x, self.pos_y))
-
-                
+                    ac_size = relTime/float(hit.preempt)
+                    size = self.circleSize[0]
+                    ac_size = self.circleSize if ac_size >= 1.0 \
+                        else (int((2.0 - ac_size) * size),
+                                int((2.0 - ac_size) * size))
+                    ac = pygame.transform.smoothscale(self.approachCircle, ac_size)
+                    ac.convert_alpha()
+                    ac.set_alpha(opacity)
+                    ac_box = ac.get_rect()
+                    ac_box.center = (x, y)
+                    img = pygame.transform.smoothscale(self.hitCircleIMG, self.circleSize)
+                    img.convert_alpha()
+                    img.set_alpha(opacity)
+                    img_box = img.get_rect()
+                    img_box.center = (x, y)
+                    self.screen.blit(img, img_box)
+                    self.screen.blit(ac, ac_box)
+                    hit.hitbox = img_box
+                    pygame.draw.lines(self.screen, pygame.Color("White"), False, hit.get_slider_path())
 
     def get_inputs(self):
         for event in pygame.event.get():
