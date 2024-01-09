@@ -2,7 +2,7 @@ from modules.curves import Curve
 class HitObject:
    
 
-    def __init__(self, description: str, difficulty: dict, beatLength: float):
+    def __init__(self, description: str, difficulty: dict, timingPoints: list):
 
         # constants
         PREEMPT = 1200
@@ -46,6 +46,9 @@ class HitObject:
         self.curvePath = None
         self.curvePointer = 0
         self.curvePathCount = 0
+        self.beatLength = 0
+        self.SV = 0
+        self.slidesPerformed = 0
 
         if self.type['SLIDER']:
             for x in params[5][2:].split('|'):
@@ -72,8 +75,28 @@ class HitObject:
             else:
                 self.sliderLength = int(float(params[7].strip()))
 
-            SV = 1
-            self.sliderTime = self.sliderLength / (int(difficulty['SliderMultiplier']) * 100 * SV) * beatLength * 1000
+            timingPtr = index(timingPoints[-1])
+            timingReferencePtr = index(timingPoints[-1])
+            for index, point in enumerate(timingPoints[:-2]):
+                if self.hitTime > point[0]:
+                    continue
+                if self.hitTime < timingPoints[index + 1][0]:
+                    timingPtr = index
+                    if timingPoints[timingPtr][5] == 1:
+                        timingReferencePtr = timingPtr
+                    else:
+                        for index, point in enumerate(reversed(timingPoints[:timingPtr])):
+                            if point[5] == 1:
+                                timingReferencePtr = index
+                    break
+
+            self.beatLength = timingPoints[timingReferencePtr][1]
+            if timingPtr == timingReferencePtr:
+                self.SV = 1
+            else:
+                self.SV = 1 * (1/abs(float(timingPoints[timingPtr][1])))
+
+            self.sliderTime = self.sliderLength / (int(difficulty['SliderMultiplier']) * 100 * self.SV) * self.beatLength * 1000
 
         OD = float(difficulty['OverallDifficulty'])
         self.hitWindow = {'300': int(80 - 6 * OD),
@@ -90,18 +113,22 @@ class HitObject:
         self.curvePathCount = len(self.curvePath)
 
     def advance_slider(self, Time) -> bool:
-
-        # i need absolute time, calc the SV by checking the timing points
-        # inverse multiplier n0 * 1/n1
-        # but i would need to check like 100+ poitns each tick
-        # maybe optimise?
+        
+        Time -= self.sliderTime * (self.slidesPerformed)
 
         if self.type["SLIDER"] is False:
             return -1 # NOT A SLIDER
-        next_point = int(step * self.curvePathCount)
+        next_point = int(Time / self.curvePathCount)
         if next_point + 1 >= self.curvePathCount:
-            self.curvePointer = self.curvePathCount - 1
-            return 0 # END OF SLIDER
+            self.slides -= 1
+            if self.slides > 0:
+                self.slidesPerformed += 1
+                self.curvePath = reversed(self.curvePath)
+                self.curvePointer = 0
+                return 1 # OK, SLIDER BOUNCES
+            else:
+                self.curvePointer = self.curvePathCount - 1
+                return 0 # END OF SLIDER
         self.curvePointer = next_point
         return 1 # OK
 

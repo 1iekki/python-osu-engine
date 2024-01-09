@@ -167,7 +167,8 @@ class PlayMap:
                     hit.sliderRuns = True
 
                 if hit.sliderRuns is True:
-                    control = hit.advance_slider(musicTime)
+                    relTime = musicTime - hit.hitTime
+                    control = hit.advance_slider(relTime)
 
                     if control == 1:
                         # eval hit 
