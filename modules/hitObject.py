@@ -75,28 +75,29 @@ class HitObject:
             else:
                 self.sliderLength = int(float(params[7].strip()))
 
-            timingPtr = index(timingPoints[-1])
-            timingReferencePtr = index(timingPoints[-1])
-            for index, point in enumerate(timingPoints[:-2]):
+            timingPtr = timingPoints.index(timingPoints[-1])
+            timingReferencePtr = timingPoints.index(timingPoints[-1])
+            for id, point in enumerate(timingPoints[:-2]):
                 if self.hitTime > point[0]:
                     continue
-                if self.hitTime < timingPoints[index + 1][0]:
-                    timingPtr = index
-                    if timingPoints[timingPtr][5] == 1:
+                if self.hitTime <= timingPoints[id + 1][0]:
+                    timingPtr = id
+                    if point[1] > 0:
                         timingReferencePtr = timingPtr
                     else:
-                        for index, point in enumerate(reversed(timingPoints[:timingPtr])):
-                            if point[5] == 1:
-                                timingReferencePtr = index
+                        i = len(timingPoints[:timingPtr]) - 1
+                        while timingPoints[i][1] < 0:
+                            i -= 1
+                        timingReferencePtr = i
                     break
 
             self.beatLength = timingPoints[timingReferencePtr][1]
             if timingPtr == timingReferencePtr:
                 self.SV = 1
             else:
-                self.SV = 1 * (1/abs(float(timingPoints[timingPtr][1])))
+                self.SV = (100/abs(float(timingPoints[timingPtr][1])))
 
-            self.sliderTime = self.sliderLength / (int(difficulty['SliderMultiplier']) * 100 * self.SV) * self.beatLength * 1000
+            self.sliderTime = self.sliderLength / (int(difficulty['SliderMultiplier']) * 100 * self.SV) * self.beatLength
 
         OD = float(difficulty['OverallDifficulty'])
         self.hitWindow = {'300': int(80 - 6 * OD),
@@ -118,7 +119,7 @@ class HitObject:
 
         if self.type["SLIDER"] is False:
             return -1 # NOT A SLIDER
-        next_point = int(Time / self.curvePathCount)
+        next_point = int((Time / self.sliderTime) *  self.curvePathCount)
         if next_point + 1 >= self.curvePathCount:
             self.slides -= 1
             if self.slides > 0:
