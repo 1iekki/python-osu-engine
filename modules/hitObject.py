@@ -49,6 +49,7 @@ class HitObject:
         self.beatLength = 0
         self.SV = 0
         self.slidesPerformed = 0
+        self.sliderTick = 0
 
         if self.type['SLIDER']:
             for x in params[5][2:].split('|'):
@@ -58,7 +59,6 @@ class HitObject:
                     b[i] = int(y)
                     i += 1
                 self.sliderCurvePoints.append(b)
-            
             match params[5][0]:
                 case 'B':
                     self.sliderType = 'B' # bezier
@@ -68,13 +68,11 @@ class HitObject:
                     self.sliderType = 'L' # linear
                 case 'P':
                     self.sliderType = 'P' # perfect circle
-            
             self.slides = params[6]
             if type(params[7]) == int:
                 self.sliderLength = params[7]
             else:
                 self.sliderLength = int(float(params[7].strip()))
-
             timingPtr = timingPoints.index(timingPoints[-1])
             timingReferencePtr = timingPoints.index(timingPoints[-1])
             for id, point in enumerate(timingPoints[:-2]):
@@ -90,15 +88,17 @@ class HitObject:
                             i -= 1
                         timingReferencePtr = i
                     break
-
             self.beatLength = timingPoints[timingReferencePtr][1]
             if timingPtr == timingReferencePtr:
                 self.SV = 1
             else:
                 self.SV = (100/abs(float(timingPoints[timingPtr][1])))
-
             self.sliderTime = self.sliderLength / (int(difficulty['SliderMultiplier']) * 100 * self.SV) * self.beatLength
-
+            self.sliderTick =  self.beatLength / float(difficulty['SliderTickRate'])
+            self.sliderBreak = False
+            self.sliderOut = False
+            self.ticks = 0
+            
         OD = float(difficulty['OverallDifficulty'])
         self.hitWindow = {'300': int(80 - 6 * OD),
                           '100': int(140 - 8 * OD),
@@ -124,9 +124,9 @@ class HitObject:
             self.slides -= 1
             if self.slides > 0:
                 self.slidesPerformed += 1
-                self.curvePath = reversed(self.curvePath)
+                self.curvePath.reverse()
                 self.curvePointer = 0
-                return 1 # OK, SLIDER BOUNCES
+                return 2 # OK, SLIDER BOUNCES
             else:
                 self.curvePointer = self.curvePathCount - 1
                 return 0 # END OF SLIDER

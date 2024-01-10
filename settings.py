@@ -1,7 +1,7 @@
 import pickle
 import pygame
 
-SETUP = {"SCREEN_RESOLUTION": (1600, 900),
+SETUP = {"SCREEN_RESOLUTION": (1920, 1080),
              "SCREEN_FLAGS": pygame.SHOWN,
              "FPS_CAP": 1000,
              "PLAYFIELD_DIMENSIONS": (640,480),
