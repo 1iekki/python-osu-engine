@@ -98,6 +98,7 @@ class HitObject:
             self.sliderBreak = False
             self.sliderOut = False
             self.ticks = 0
+            self.sliderClicked = False
             
         OD = float(difficulty['OverallDifficulty'])
         self.hitWindow = {'300': int(80 - 6 * OD),
