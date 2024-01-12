@@ -15,6 +15,7 @@ class PlayMap:
                  cursor: Cursor):
         
         BACKROW_ALPHA = 160
+        COMBOBREAK_THRESHOLD = 5
 
         playField = settings["PLAYFIELD_DIMENSIONS"]
         fpsCap = settings["FPS_CAP"]
@@ -38,6 +39,7 @@ class PlayMap:
                          - (self.playField[1] / 2))        
         self.hitQueue = []
         self.comboBreak = True
+        self.comboBreakTreshold = COMBOBREAK_THRESHOLD
         self.combo = 1
         self.score = 0
         self.rendered = 0
@@ -46,12 +48,16 @@ class PlayMap:
         self.controls = {"INPUT_KEY_1": settings["INPUT_KEY_1"], "INPUT_KEY_2": settings["INPUT_KEY_2"]}
         self.cursor = cursor
         self.soundChannel = pygame.mixer.Channel(0)
+        self.soundChannel2 = pygame.mixer.Channel(1)
         self.hit50 = 0
         self.hit100 = 0
         self.hit300 = 0
         self.miss = 0
         self.all = 0
-        self.hitnormal = pygame.mixer.Sound("hitsounds/normal-hitnormal.wav")
+        self.sounds = {
+            'hitnormal': pygame.mixer.Sound("hitsounds/normal-hitnormal.wav"),
+            'slidertick': pygame.mixer.Sound("hitsounds/normal-slidertick.wav"),
+            'combobreak': pygame.mixer.Sound("hitsounds/combobreak.mp3")}
         self.soundChannel.set_volume(0.3)
         self.frontRow = self.screen.copy()
         self.backRow = self.screen.copy()
@@ -63,12 +69,18 @@ class PlayMap:
         self.hitNum = 1
 
     def set_map(self, map: Beatmap):
+        
+        SLIDER_BALL_SCALE = 1.5
+
         self.map = map
         self.hitObjects = map.get_hitobjects()
         self.music = map.get_audio()
         
         size = self.map.circleSize * self.scale_factor * 2
         self.circleSize = (size, size)     
+
+        self.sliderBallSize = (size * SLIDER_BALL_SCALE,
+                               size * SLIDER_BALL_SCALE)
         self.hitCircleIMG = pygame.image.load("images/hitcircle.png")
         self.approachCircle = pygame.image.load("images/approachcircle.png")
         self.sliderBounceIMG = pygame.image.load("images/sliderreverse.png")
@@ -169,6 +181,8 @@ class PlayMap:
                     self.hitQueue.remove(hit)
                     self.miss += 1
                     self.all += 3
+                    if self.combo > self.comboBreakTreshold:
+                        self.soundChannel2.play(self.sounds['combobreak'])
                     self.combo = 1
                     continue 
 
@@ -246,7 +260,7 @@ class PlayMap:
                     if control == SLIDER_BOUNCES:
                         pos = pygame.mouse.get_pos()
                         collision = hit.hitbox.collidepoint(pos)
-                        self.soundChannel.play(self.hitnormal)
+                        self.soundChannel.play(self.sounds['hitnormal'])
                         if collision:
                             self.combo += 1
                         else:
@@ -257,8 +271,12 @@ class PlayMap:
                     img.convert_alpha()
                     img_box = img.get_rect()
                     img_box.center = (new_x, new_y)
+                    ac = pygame.transform.smoothscale(self.approachCircle, self.sliderBallSize)
+                    ac_box = ac.get_rect()
+                    ac_box.center = (new_x, new_y)
+                    surf.blit(ac, ac_box)
                     surf.blit(img, img_box)
-                    hit.hitbox = img_box
+                    hit.hitbox = ac_box
 
                     pos = pygame.mouse.get_pos()
                     collision = hit.hitbox.collidepoint(pos)
@@ -328,6 +346,8 @@ class PlayMap:
                         scored = self.eval_hits()
                         if scored == -1: continue
                         if self.comboBreak:
+                            if self.combo > self.comboBreakTreshold:
+                                self.soundChannel2.play(self.sounds['combobreak'])
                             self.combo = 1
                         else:
                             self.combo += 1
@@ -339,32 +359,47 @@ class PlayMap:
                         scored = self.eval_hits()
                         if scored == -1: continue
                         if scored == 0:
+                            if self.combo > self.comboBreakTreshold:
+                                self.soundChannel2.play(self.sounds['combobreak'])
                             self.combo = 1
                         self.score += scored * self.combo
             if event.type == pygame.KEYUP:
-                self.clicked["INPUT_KEY_1"] = False
-                self.clicked["INPUT_KEY_2"] = False
+                if event.key == self.controls["INPUT_KEY_1"]:
+                    self.clicked["INPUT_KEY_1"] = False
+                if event.key == self.controls["INPUT_KEY_2"]:
+                    self.clicked["INPUT_KEY_2"] = False
 
     def eval_slider_end(self, hit) -> int:
-        self.soundChannel.play(self.hitnormal)
+        self.soundChannel.play(self.sounds['hitnormal'])
         pos = pygame.mouse.get_pos()
         collision = hit.hitbox.collidepoint(pos)
         if collision and not hit.sliderOut \
             and (self.clicked['INPUT_KEY_1'] \
                  or self.clicked['INPUT_KEY_2']):
             self.combo += 1
+            self.hitQueue.remove(hit)
+            self.all += 3
+            self.hit300 += 1
             return 300
         if collision and hit.sliderOut \
             and (self.clicked['INPUT_KEY_1'] \
                  or self.clicked['INPUT_KEY_2']):
             self.combo += 1
+            self.all += 3
+            self.hit100 += 1
+            self.hitQueue.remove(hit)
             return 100
         if collision and hit.sliderBreak \
             and (self.clicked['INPUT_KEY_1'] \
                  or self.clicked['INPUT_KEY_2']):
-            return 100
-        self.comboBreak = True
+            self.all += 3
+            self.hit50 += 1
+            self.hitQueue.remove(hit)
+            return 50
         self.hitQueue.remove(hit)
+        self.comboBreak = True
+        self.all += 3
+        self.miss += 1
         return 0
 
     def eval_hits(self) -> int:
@@ -381,7 +416,7 @@ class PlayMap:
                 if musicTime < hit.hitTime - hit.hitWindow['50']:
                     self.comboBreak = True
                     self.hitQueue.pop(0)
-                    self.soundChannel.play(self.hitnormal)
+                    self.soundChannel.play(self.sounds['hitnormal'])
                     self.all += 3
                     self.miss += 1
                     return 0
@@ -389,7 +424,7 @@ class PlayMap:
                     and musicTime < hit.hitTime - hit.hitWindow['100']:
                     self.comboBreak = False
                     self.hitQueue.pop(0)
-                    self.soundChannel.play(self.hitnormal)
+                    self.soundChannel.play(self.sounds['hitnormal'])
                     self.all += 3
                     self.hit50 += 1
                     return 50
@@ -397,7 +432,7 @@ class PlayMap:
                     and musicTime < hit.hitTime - hit.hitWindow['300']:
                     self.comboBreak = False
                     self.hitQueue.pop(0)
-                    self.soundChannel.play(self.hitnormal)
+                    self.soundChannel.play(self.sounds['hitnormal'])
                     self.all += 3
                     self.hit100 += 1
                     return 100
@@ -405,7 +440,7 @@ class PlayMap:
                     and musicTime < hit.hitTime + hit.hitWindow['300']:
                     self.comboBreak = False
                     self.hitQueue.pop(0)
-                    self.soundChannel.play(self.hitnormal)
+                    self.soundChannel.play(self.sounds['hitnormal'])
                     self.all += 3
                     self.hit300 += 1
                     return 300
@@ -413,7 +448,7 @@ class PlayMap:
                     and musicTime < hit.hitTime + hit.hitWindow['100']:
                     self.comboBreak = False
                     self.hitQueue.pop(0)
-                    self.soundChannel.play(self.hitnormal)
+                    self.soundChannel.play(self.sounds['hitnormal'])
                     self.all += 3
                     self.hit100 += 1
                     return 100
@@ -421,14 +456,14 @@ class PlayMap:
                     and musicTime < hit.hitTime + hit.hitWindow['50']:
                     self.comboBreak = False
                     self.hitQueue.pop(0)
-                    self.soundChannel.play(self.hitnormal)
+                    self.soundChannel.play(self.sounds['hitnormal'])
                     self.all += 3
                     self.hit50 += 1
                     return 50
                 if musicTime > hit.hitTime + hit.hitWindow['50']:
                     self.comboBreak = True
                     self.hitQueue.pop(0)
-                    self.soundChannel.play(self.hitnormal)
+                    self.soundChannel.play(self.sounds['hitnormal'])
                     self.all += 3
                     self.miss += 1
                     return 0
@@ -436,25 +471,31 @@ class PlayMap:
             if hit.type['SLIDER'] == True:
                 if musicTime < hit.hitTime - hit.hitWindow['50']:
                     self.comboBreak = True
-                    self.soundChannel.play(self.hitnormal)
+                    
                     return 0
                 if musicTime > hit.hitTime - hit.hitWindow['50'] \
                     and musicTime < hit.hitTime - hit.hitWindow['300']:
                     self.comboBreak = False
-                    self.soundChannel.play(self.hitnormal)
+                    if hit.sliderClicked is False:
+                        self.soundChannel.play(self.sounds['hitnormal'])
+                    hit.sliderClicked = True
                     return -1
                 if musicTime > hit.hitTime - hit.hitWindow['300'] \
                     and musicTime < hit.hitTime + hit.hitWindow['300']:
                     self.comboBreak = False
-                    self.soundChannel.play(self.hitnormal)
+                    if hit.sliderClicked is False:
+                        self.soundChannel.play(self.sounds['hitnormal'])
+                    hit.sliderClicked = True
                     return -1
                 if musicTime > hit.hitTime + hit.hitWindow['300'] \
                     and musicTime < hit.hitTime + hit.hitWindow['50']:
                     self.comboBreak = False
-                    self.soundChannel.play(self.hitnormal)
+                    if hit.sliderClicked is False:
+                        self.soundChannel.play(self.sounds['hitnormal'])
+                    hit.sliderClicked = True
                     return -1
                 if musicTime > hit.hitTime + hit.hitWindow['50']:
                     self.comboBreak = True
-                    self.soundChannel.play(self.hitnormal)
+                    self.soundChannel2.play(self.sounds['hitnormal'])
                     return 0
         return -1

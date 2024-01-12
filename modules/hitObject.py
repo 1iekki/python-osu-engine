@@ -50,6 +50,9 @@ class HitObject:
         self.SV = 0
         self.slidesPerformed = 0
         self.sliderTick = 0
+        self.hitnum = 0
+        self.sliderClicked = False
+
 
         if self.type['SLIDER']:
             for x in params[5][2:].split('|'):

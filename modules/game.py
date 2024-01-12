@@ -21,7 +21,7 @@ class Game:
         )
         self.fpsCap = self.settings["FPS_CAP"]
         
-        self.cursor = Cursor(self.screen)
+        self.cursor = Cursor()
         self.clock = pygame.time.Clock()
         self.gameState = GameStateManager()
         self.mainMenu = MainMenu(self.screen, self.gameState) 
@@ -44,6 +44,6 @@ class Game:
 
             currentState = self.STATES[self.gameState.get_state()]            
             currentState.run()
-            self.cursor.update()
+            self.cursor.update(self.screen)
             pygame.display.flip()
             self.clock.tick(self.fpsCap)
