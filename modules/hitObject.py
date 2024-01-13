@@ -96,7 +96,7 @@ class HitObject:
                 self.SV = 1
             else:
                 self.SV = (100/abs(float(timingPoints[timingPtr][1])))
-            self.sliderTime = self.sliderLength / (int(difficulty['SliderMultiplier']) * 100 * self.SV) * self.beatLength
+            self.sliderTime = self.sliderLength / (float(difficulty['SliderMultiplier']) * 100 * self.SV) * self.beatLength
             self.sliderTick =  self.beatLength / float(difficulty['SliderTickRate'])
             self.sliderBreak = False
             self.sliderOut = False
@@ -138,6 +138,9 @@ class HitObject:
         return 1 # OK
 
     def get_slider_phase(self) -> list:
-        return self.curvePath[self.curvePointer]
+        if self.curvePointer < self.curvePathCount:
+            return self.curvePath[self.curvePointer]
+        else:
+            return self.curvePath[-1]
 
 
