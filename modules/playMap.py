@@ -94,6 +94,9 @@ class PlayMap:
             'combobreak': pygame.mixer.Sound("hitsounds/combobreak.mp3")}
 
     def run(self):
+        
+        pygame.display.set_caption(
+            f"{self.map.metadata['Artist']} - {self.map.metadata['Title']}")
 
         #init sliders
         for hit in self.hitObjects:
