@@ -96,7 +96,7 @@ class PlayMap:
     def run(self):
         
         pygame.display.set_caption(
-            f"{self.map.metadata['Artist']} - {self.map.metadata['Title']}")
+            f"Playing: {self.map.name}")
 
         #init sliders
         for hit in self.hitObjects:
