@@ -26,11 +26,11 @@ class Button:
         self.clicked = False
         self.hovered = False
 
-    def set_pos(self, x: int, y: int):
+    def set_pos(self, cords: tuple):
         '''
         Sets the position of the button
         '''
-        self.rect.center = (x, y)
+        self.rect.center = cords
 
     def draw(self, screen : pygame.surface):
         '''
@@ -48,7 +48,7 @@ class Button:
                         self.image, (self.width, self.height))
         self.rect = self.image.get_rect()
 
-    def onClick(self, action: Callable):
+    def onClick(self, action: Callable, arg=None):
         '''
         This method checks if the user clicked the button
         and calls the function specified by the argument action
@@ -59,7 +59,10 @@ class Button:
             if pygame.mouse.get_pressed()[0] == 1 \
                and self.clicked is False:
                 self.clicked = True
-                return action()
+                if arg:
+                    return action(arg)
+                else: 
+                    return action()
         if pygame.mouse.get_pressed()[0] == 0:
             self.clicked = False
 
@@ -68,21 +71,21 @@ if __name__ == "__main__":
 
     import sys
 
-    def test_func():
-        print("clicked")
+    def test_func(str=""):
+        print("clicked" + str[0])
 
     pygame.init()
     scr = pygame.display.set_mode((800, 600))
     win = scr.get_rect()
 
-    test_img = pygame.image.load("test_image.png")
-    test_button = Button(win.center, test_img)
+    test_img = pygame.image.load("images/start_button.png")
+    test_button = Button(test_img)
     test_button.draw(scr)
 
     pygame.display.flip()
 
     while True:
-        test_button.onClick(test_func)
+        test_button.onClick(test_func, ["jajko"])
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()

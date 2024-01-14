@@ -1,0 +1,2 @@
+class HowToScreen:
+    pass

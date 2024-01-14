@@ -5,6 +5,9 @@ from modules.gameStateManager import GameStateManager
 from modules.mainMenu import MainMenu
 from modules.playMap import PlayMap
 from modules.levelSelection import LevelSelection
+from modules.askQuit import AskQuit
+from modules.howToScreen import HowToScreen
+from modules.creditsScreen import CreditsScreen
 class Game:
     def __init__(self):
         pygame.init()
@@ -30,14 +33,19 @@ class Game:
                                self.cursor)
         self.levelSelection = LevelSelection(self.screen,
                                              self.gameState, self.playMap)
-
+        self.askQuit = AskQuit(self.screen, self.gameState)
+        self.howTo = HowToScreen()
+        self.credits = CreditsScreen()
         self.STATES = {"MainMenu": self.mainMenu,
                        "LevelSelection": self.levelSelection,
-                       "PlayMap": self.playMap 
+                       "PlayMap": self.playMap,
+                       "AskQuit": self.askQuit,
+                       "HowTo": self.howTo,
+                       "Credits": self.credits
                       }
 
     def run(self):
-        self.gameState.set_state("LevelSelection")
+        self.gameState.set_state("MainMenu")
         while True:
             # dont place any code here, any changes should be made
             # in run methods of level objects specified in STATES

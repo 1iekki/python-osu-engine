@@ -1,6 +1,5 @@
 import pygame
 import sys
-import math
 from modules.gameStateManager import GameStateManager
 from modules.cursor import Cursor
 from modules.beatmap_parser import Beatmap
@@ -54,10 +53,6 @@ class PlayMap:
         self.hit300 = 0
         self.miss = 0
         self.all = 0
-        self.sounds = {
-            'hitnormal': pygame.mixer.Sound("hitsounds/normal-hitnormal.wav"),
-            'slidertick': pygame.mixer.Sound("hitsounds/normal-slidertick.wav"),
-            'combobreak': pygame.mixer.Sound("hitsounds/combobreak.mp3")}
         self.soundChannel.set_volume(0.3)
         self.frontRow = self.screen.copy()
         self.backRow = self.screen.copy()
@@ -93,6 +88,10 @@ class PlayMap:
                             7: pygame.image.load("images/7.png"),
                             8: pygame.image.load("images/8.png"),
                             9: pygame.image.load("images/9.png")}
+        self.sounds = {
+            'hitnormal': pygame.mixer.Sound("hitsounds/normal-hitnormal.wav"),
+            'slidertick': pygame.mixer.Sound("hitsounds/normal-slidertick.wav"),
+            'combobreak': pygame.mixer.Sound("hitsounds/combobreak.mp3")}
 
     def run(self):
 
@@ -115,13 +114,15 @@ class PlayMap:
             pygame.display.flip()
     
     def show_score(self):
+
+
         score_font = pygame.font.Font('freesansbold.ttf', 48)
-        score_text = score_font.render(f"{self.score}", True, pygame.color.Color("White"))
+        score_text = score_font.render(f"SCORE: {self.score}", True, pygame.color.Color("White"))
         score_box = score_text.get_rect()
         score_box.centerx = self.window.centerx
-        score_box.top = self.window.top + 8
+        score_box.top = self.window.top
         
-        combo_text = score_font.render(f"{self.combo}X", True, pygame.color.Color("White"))
+        combo_text = score_font.render(f"COMBO: {self.combo}X", True, pygame.color.Color("White"))
         combo_box = score_text.get_rect()
         combo_box.bottomleft = self.window.bottomleft
 
@@ -130,7 +131,7 @@ class PlayMap:
                       + self.hit100 * 2 
                       + self.hit50) / self.all * 100
 
-        acc_text = score_font.render(f"{acc:.2f}%", True, pygame.color.Color("White"))
+        acc_text = score_font.render(f"ACC: {acc:.2f}%", True, pygame.color.Color("White"))
         acc_box = acc_text.get_rect()
         acc_box.topright = self.window.topright
         
@@ -206,8 +207,8 @@ class PlayMap:
                 ac_size = relTime/float(hit.preempt)
                 size = self.circleSize[0]
                 ac_size = self.circleSize if ac_size >= 1.0 \
-                    else (int((2.0 - ac_size) * size),
-                            int((2.0 - ac_size) * size))
+                    else (int((3.0 - ac_size * 2) * size),
+                            int((3.0 - ac_size * 2) * size))
                 ac = pygame.transform.smoothscale(self.approachCircle, ac_size)
                 ac.convert_alpha()
                 ac.set_alpha(opacity)
