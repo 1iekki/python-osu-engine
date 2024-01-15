@@ -14,7 +14,8 @@ class LevelSelection:
 
     def run(self):
         pygame.display.set_caption("Level Selection")
-
+        self.playMap.set_map(self.beatmaps[0])
+        self.gameState.set_state("PlayMap")
         self.screen.fill(pygame.Color("Black"))
         self.controls()
 
@@ -26,3 +27,4 @@ class LevelSelection:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.gameState.set_state("MainMenu")
+                    

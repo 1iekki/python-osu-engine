@@ -62,11 +62,35 @@ class PlayMap:
         self.sliderCircleWidth = 2
         self.sliderCircleColor = (255, 255, 255)
         self.hitNum = 1
+        self.currentsurf = self.backRow
+        self.mousePos = None
+
+    def reset_vars(self):
+        
+        self.map = None
+        self.hitObjects = None
+        self.circleSize = None
+        self.music = None
+        self.mousePos = None
+        self.hitNum = 1
+        self.hitQueue = []
+        self.comboBreak = True
+        self.combo = 1
+        self.score = 0
+        self.rendered = 0
+        self.clickTime = 0
+        self.hit50 = 0
+        self.hit100 = 0
+        self.hit300 = 0
+        self.miss = 0
+        self.all = 0
+
 
     def set_map(self, map: Beatmap):
         
-        SLIDER_BALL_SCALE = 1.5
+        SLIDER_BALL_SCALE = 2
 
+        # get map info
         self.map = map
         self.hitObjects = map.get_hitobjects()
         self.music = map.get_audio()
@@ -74,7 +98,7 @@ class PlayMap:
         size = self.map.circleSize * self.scale_factor * 2
         self.circleSize = (size, size)     
 
-        self.sliderBallSize = (size * SLIDER_BALL_SCALE,
+        self.sliderFieldSize = (size * SLIDER_BALL_SCALE,
                                size * SLIDER_BALL_SCALE)
         self.hitCircleIMG = pygame.image.load("images/hitcircle.png")
         self.approachCircle = pygame.image.load("images/approachcircle.png")
@@ -116,8 +140,51 @@ class PlayMap:
             self.screen.blit(self.frontRow, (0,0))
             pygame.display.flip()
     
-    def show_score(self):
+    def render_hitcircle(self, hit):
+        x = hit.x * self.scale_factor
+        y = hit.y * self.scale_factor
+        x += self.pos_x
+        y += self.pos_y
+        x = int(x)
+        y = int(y)
 
+        musicTime = pygame.mixer.music.get_pos()
+        relTime = musicTime - hit.showTime
+        fadeIN = relTime/float(hit.fadeIn)
+        fadeOUT = (relTime - hit.preempt) \
+            / float(hit.hitWindow['50'])
+
+        if relTime < hit.preempt:
+            opacity = 255 if fadeIN > 1.0 else int(255*fadeIN)
+        else:
+            opacity = int(255 - 255 * fadeOUT)               
+
+        ac_size = relTime/float(hit.preempt)
+        size = self.circleSize[0]
+        ac_size = self.circleSize if ac_size >= 1.0 \
+            else (int((3.0 - ac_size * 2) * size),
+                    int((3.0 - ac_size * 2) * size))
+        ac = pygame.transform.smoothscale(self.approachCircle, ac_size)
+        ac.convert_alpha()
+        ac.set_alpha(opacity)
+        ac_box = ac.get_rect()
+        ac_box.center = (x, y)
+        img = pygame.transform.smoothscale(self.hitCircleIMG, self.circleSize)
+        img.convert_alpha()
+        img.set_alpha(opacity)
+        img_box = img.get_rect()
+        img_box.center = (x, y)
+        hitnum = pygame.transform.smoothscale(self.hitInternal[hit.hitnum], self.circleSize)
+        hitnum.convert_alpha()
+        hitnum.set_alpha(opacity)
+        hitnum_box = img.get_rect()
+        hitnum_box.center = (x, y)
+        self.currentsurf.blit(hitnum, hitnum_box)
+        self.currentsurf.blit(img, img_box)
+        self.currentsurf.blit(ac, ac_box)
+        hit.hitbox = img_box
+
+    def show_score(self):
 
         score_font = pygame.font.Font('freesansbold.ttf', 48)
         score_text = score_font.render(f"SCORE: {self.score}", True, pygame.color.Color("White"))
@@ -164,6 +231,8 @@ class PlayMap:
         queue = self.hitQueue.copy()
         queue.reverse()
         for i, hit in enumerate(queue):
+
+            # hitobject numbering
             if hit.hitnum == 0:
                 if hit.type['NEWCOMBO'] is True:
                     self.hitNum = 1
@@ -173,15 +242,21 @@ class PlayMap:
                     self.hitNum = 1
                 hit.hitnum = self.hitNum
 
+            # first hitobject highlighting
             if i == queue.index(queue[-1]):
-                surf = self.frontRow
+                self.currentsurf = self.frontRow
             else:
-                surf = self.backRow
+                self.currentsurf = self.backRow
 
             musicTime = pygame.mixer.music.get_pos()
-            if hit.type ['HITCIRCLE'] is True:
 
-                if musicTime >= hit.showTime + hit.preempt + hit.hitWindow['50']:
+            if hit.type ['HITCIRCLE'] is True:
+                
+                self.render_hitcircle(hit)
+
+                # remove missed hitcircles
+                missTime = hit.showTime + hit.preempt + hit.hitWindow['50']
+                if musicTime >= missTime:
                     self.hitQueue.remove(hit)
                     self.miss += 1
                     self.all += 3
@@ -190,63 +265,26 @@ class PlayMap:
                     self.combo = 1
                     continue 
 
-                x = hit.x * self.scale_factor
-                y = hit.y * self.scale_factor
-                x += self.pos_x
-                y += self.pos_y
-                x = int(x)
-                y = int(y)
-
-                relTime = musicTime - hit.showTime
-                fadeIN = relTime/float(hit.fadeIn)
-                fadeOUT = (relTime - hit.preempt) \
-                    / float(hit.hitWindow['50'])
-
-                if relTime < hit.preempt:
-                    opacity = 255 if fadeIN > 1.0 else int(255*fadeIN)
-                else:
-                    opacity = int(255 - 255 * fadeOUT)               
-
-                ac_size = relTime/float(hit.preempt)
-                size = self.circleSize[0]
-                ac_size = self.circleSize if ac_size >= 1.0 \
-                    else (int((3.0 - ac_size * 2) * size),
-                            int((3.0 - ac_size * 2) * size))
-                ac = pygame.transform.smoothscale(self.approachCircle, ac_size)
-                ac.convert_alpha()
-                ac.set_alpha(opacity)
-                ac_box = ac.get_rect()
-                ac_box.center = (x, y)
-                img = pygame.transform.smoothscale(self.hitCircleIMG, self.circleSize)
-                img.convert_alpha()
-                img.set_alpha(opacity)
-                img_box = img.get_rect()
-                img_box.center = (x, y)
-                hitnum = pygame.transform.smoothscale(self.hitInternal[hit.hitnum], self.circleSize)
-                hitnum.convert_alpha()
-                hitnum.set_alpha(opacity)
-                hitnum_box = img.get_rect()
-                hitnum_box.center = (x, y)
-                surf.blit(hitnum, hitnum_box)
-                surf.blit(img, img_box)
-                surf.blit(ac, ac_box)
-                hit.hitbox = img_box
-
-            
             if hit.type['SLIDER'] is True:
 
                 # draw slider outline
                 path = hit.get_slider_path()
                 radius = self.circleSize[0] / 2
                 for (x,y) in path:
-                    pygame.draw.circle(surf, self.sliderColor, (x,y), radius)
-                pygame.draw.circle(surf, self.sliderCircleColor, path[0], radius, self.sliderCircleWidth)
-                pygame.draw.circle(surf, self.sliderCircleColor, path[-1], radius, self.sliderCircleWidth)
+                    pygame.draw.circle(self.currentsurf, 
+                                       self.sliderColor, (x,y), radius)
+                pygame.draw.circle(self.currentsurf, 
+                                   self.sliderCircleColor, 
+                                   path[0], radius, self.sliderCircleWidth)
+                pygame.draw.circle(self.currentsurf, 
+                                   self.sliderCircleColor, 
+                                   path[-1], radius, self.sliderCircleWidth)
                 if hit.slides > 1:
-                    bounce_img = pygame.transform.smoothscale(self.sliderBounceIMG, self.circleSize)
+                    bounce_img = pygame.transform.smoothscale(
+                        self.sliderBounceIMG, self.circleSize)
                     bounce_box = bounce_img.get_rect()
                     bounce_box.center = path[-1]
-                    surf.blit(bounce_img, bounce_box)
+                    self.currentsurf.blit(bounce_img, bounce_box)
 
                 #slider activation
                 if musicTime >= hit.hitTime:
@@ -271,15 +309,17 @@ class PlayMap:
                             hit.sliderBreak = True
 
                     (new_x, new_y) = hit.get_slider_phase()
-                    img = pygame.transform.smoothscale(self.hitCircleIMG, self.circleSize)
+                    img = pygame.transform.smoothscale(
+                        self.hitCircleIMG, self.circleSize)
                     img.convert_alpha()
                     img_box = img.get_rect()
                     img_box.center = (new_x, new_y)
-                    ac = pygame.transform.smoothscale(self.approachCircle, self.sliderBallSize)
+                    ac = pygame.transform.smoothscale(
+                        self.approachCircle, self.sliderFieldSize)
                     ac_box = ac.get_rect()
                     ac_box.center = (new_x, new_y)
-                    surf.blit(ac, ac_box)
-                    surf.blit(img, img_box)
+                    self.currentsurf.blit(ac, ac_box)
+                    self.currentsurf.blit(img, img_box)
                     hit.hitbox = ac_box
 
                     pos = pygame.mouse.get_pos()
@@ -295,45 +335,66 @@ class PlayMap:
                         else:
                             self.combo += 1
                 else:
-                    x = hit.x * self.scale_factor
-                    y = hit.y * self.scale_factor
-                    x += self.pos_x
-                    y += self.pos_y
-                    x = int(x)
-                    y = int(y)
+                    self.render_hitcircle(hit)
 
-                    relTime = musicTime - hit.showTime
-                    fadeIN = relTime/float(hit.fadeIn)
+    def pause(self):
+        BLACK = pygame.Color("Black")
+        WHITE = pygame.Color("White")
+        PAUSE_ALPHA = 100
+        CURSOR_POS_COLOR = pygame.Color("Orange")
+        CURSOR_RAD = self.cursor.cursor_img.get_height() / 2
+        ORIGIN = (0, 0)
 
-                    opacity = 255 if fadeIN > 1.0 else int(255*fadeIN)          
+        pygame.mixer.music.pause()
+        
+        paused = True
+        while paused:
+            self.screen.fill(BLACK)
+            self.backRow.blit(self.frontRow, ORIGIN)
+            self.backRow.set_alpha(PAUSE_ALPHA)
+            self.backRow.blit(self.screen, ORIGIN)
+            text_font = pygame.font.Font('freesansbold.ttf', 64)
+            text_text = text_font.render(f"PAUSED", True, WHITE)
+            text_box = text_text.get_rect()
+            text_box.centerx = self.window.centerx
+            text_box.top = self.window.top
+            info1_font = pygame.font.Font('freesansbold.ttf', 48)
+            info1_text = info1_font.render(f"Click on circle to continue",
+                                            True, WHITE)
+            info1_box = info1_text.get_rect()
+            info1_box.centerx = self.window.centerx
+            info1_box.top = text_box.bottom
+            info2_font = pygame.font.Font('freesansbold.ttf', 48)
+            info2_text = info2_font.render(f"Press ESC to quit", 
+                                           True, WHITE)
+            info2_box = info2_text.get_rect()
+            info2_box.centerx = self.window.centerx
+            info2_box.top = info1_box.bottom
 
-                    ac_size = relTime/float(hit.preempt)
-                    size = self.circleSize[0]
-                    ac_size = self.circleSize if ac_size >= 1.0 \
-                        else (int((3.0 - ac_size * 2) * size),
-                                int((3.0 - ac_size * 2) * size))
-                    ac = pygame.transform.smoothscale(self.approachCircle, ac_size)
-                    ac.convert_alpha()
-                    ac.set_alpha(opacity)
-                    ac_box = ac.get_rect()
-                    ac_box.center = (x, y)
-                    img = pygame.transform.smoothscale(self.hitCircleIMG, self.circleSize)
-                    img.convert_alpha()
-                    img.set_alpha(opacity)
-                    img_box = img.get_rect()
-                    img_box.center = (x, y)
-                    hitnum = pygame.transform.smoothscale(self.hitInternal[hit.hitnum], self.circleSize)
-                    hitnum.convert_alpha()
-                    hitnum.set_alpha(opacity)
-                    hitnum_box = img.get_rect()
-                    hitnum_box.center = (x, y)
-                    surf.blit(hitnum, hitnum_box)
-                    surf.blit(img, img_box)
-                    surf.blit(ac, ac_box)
-                    hit.hitbox = img_box
-                    pygame.draw.lines(self.screen, pygame.Color("White"),
-                                      False, hit.get_slider_path())
-                    
+            self.screen.blit(text_text, text_box)
+            self.screen.blit(info1_text, info1_box)
+            self.screen.blit(info2_text, info2_box)
+            circle = pygame.draw.circle(
+                self.screen, CURSOR_POS_COLOR, self.mousePos, CURSOR_RAD)
+            self.cursor.update(self.screen)
+
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        self.reset_vars()
+                        self.gameState.set_state("LevelSelection")
+                        paused = False
+                    if event.key in self.controls.values():
+                        collision = circle.collidepoint(self.mousePos)
+                        if collision:
+                            pygame.mixer.music.unpause()
+                            paused = False
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+            pygame.display.flip()
+
     def get_inputs(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -341,8 +402,8 @@ class PlayMap:
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    pygame.quit()
-                    sys.exit()
+                    self.mousePos = pygame.mouse.get_pos()
+                    self.pause()
                 if event.key == self.controls["INPUT_KEY_1"]:
                     if self.clicked["INPUT_KEY_1"] == False:
                         self.clickTime = pygame.mixer.music.get_pos()
@@ -351,7 +412,8 @@ class PlayMap:
                         if scored == -1: continue
                         if self.comboBreak:
                             if self.combo > self.comboBreakTreshold:
-                                self.soundChannel2.play(self.sounds['combobreak'])
+                                self.soundChannel2.play(
+                                    self.sounds['combobreak'])
                             self.combo = 1
                         else:
                             self.combo += 1
@@ -415,7 +477,7 @@ class PlayMap:
         collision = hit.hitbox.collidepoint(cursorPos)
 
         if collision:
-            if hit.type['HITCIRCLE'] == True:
+            if hit.type['HITCIRCLE'] is True:
 
                 if musicTime < hit.hitTime - hit.hitWindow['50']:
                     self.comboBreak = True
@@ -472,10 +534,9 @@ class PlayMap:
                     self.miss += 1
                     return 0
                 
-            if hit.type['SLIDER'] == True:
+            if hit.type['SLIDER'] is True:
                 if musicTime < hit.hitTime - hit.hitWindow['50']:
                     self.comboBreak = True
-                    
                     return 0
                 if musicTime > hit.hitTime - hit.hitWindow['50'] \
                     and musicTime < hit.hitTime - hit.hitWindow['300']:
@@ -500,6 +561,5 @@ class PlayMap:
                     return -1
                 if musicTime > hit.hitTime + hit.hitWindow['50']:
                     self.comboBreak = True
-                    self.soundChannel2.play(self.sounds['hitnormal'])
                     return 0
         return -1
