@@ -85,7 +85,7 @@ if __name__ == "__main__":
     pygame.display.flip()
 
     while True:
-        test_button.onClick(test_func, ["jajko"])
+        test_button.onClick(test_func, "jajko")
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()

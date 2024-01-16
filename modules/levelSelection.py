@@ -27,17 +27,17 @@ class LevelSelection:
 
     def run(self):
         pygame.display.set_caption("Level Selection")
-        # self.playMap.set_map(self.beatmaps[0])
-        # self.gameState.set_state("PlayMap")
         self.screen.fill(pygame.Color("Black"))
         
         if len(self.containers) == 0:
             return
 
-        if len(self.containers) > self.roullettePos:
-            cont = self.containers[self.roullettePos]
-        else:
+        if len(self.containers) < self.roullettePos:
             self.roullettePos = [0]
+
+        if self.roullettePos + self.limit > len(self.containers):
+            self.roullettePos -= 1
+            return
         
         for i,cont in enumerate(self.containers[
           self.roullettePos : self.roullettePos + self.limit]):
@@ -56,4 +56,22 @@ class LevelSelection:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.gameState.set_state("MainMenu")
-                    
+                if event.key == pygame.K_DOWN:
+                    self.roullettePos += 1
+                if event.key == pygame.K_UP:
+                    self.roullettePos -= 1
+            if event.type == pygame.MOUSEWHEEL:
+                if event.preciseY < 0:
+                    self.roullettePos += 1
+                if event.preciseY > 0:
+                    self.roullettePos -= 1
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    for cont in self.containers[
+                      self.roullettePos : 
+                      self.roullettePos + self.limit]:
+                        pos = pygame.mouse.get_pos()
+                        collision = cont.containerBox.collidepoint(pos)
+                        if collision:
+                            self.playMap.set_map(cont.map)
+                            self.gameState.set_state("PlayMap")
