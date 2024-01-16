@@ -9,6 +9,7 @@ class LevelSelection:
     def __init__(self, screen: pygame.Surface, 
                  gameState: GameStateManager, playMap: PlayMap):
         
+        
         self.margin = 5
         self.screen = screen
         self.window = screen.get_rect()
@@ -28,6 +29,7 @@ class LevelSelection:
     def run(self):
         pygame.display.set_caption("Level Selection")
         self.screen.fill(pygame.Color("Black"))
+        WHITE = pygame.Color("White")
         
         if len(self.containers) == 0:
             return
@@ -39,12 +41,20 @@ class LevelSelection:
             self.roullettePos -= 1
             return
         
+        text_font = pygame.font.Font('freesansbold.ttf', 64)
+        text_text = text_font.render(f"SELECT LEVEL", True, WHITE)
+        text_box = text_text.get_rect()
+        text_box.centerx = self.window.centerx
+        text_box.top = self.window.top
+        self.screen.blit(text_text, text_box)
+
         for i,cont in enumerate(self.containers[
           self.roullettePos : self.roullettePos + self.limit]):
             h = cont.containerBox.h
             offset = h / 2
             cont.set_pos(self.window.centerx, 
-                         self.window.top + offset + h * i + self.margin)
+                         self.window.top + text_box.h + \
+                         offset + h * i + self.margin * i)
             cont.draw(self.screen)
         self.controls()
 
