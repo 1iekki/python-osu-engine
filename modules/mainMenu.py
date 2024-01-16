@@ -8,7 +8,7 @@ class MainMenu:
     
     def __init__(self, screen: pygame.Surface, gameState: GameStateManager):
 
-        MARGIN = 30
+        MARGIN = 20
         WHITE = pygame.Color("White")
 
         self.screen = screen

@@ -25,22 +25,18 @@ class LevelSelection:
         for i, cont in enumerate(self.containers):
             cont.set_dimensions(self.conx, self.cony)
         self.limit = 5
+        self.scroll = None
+        self.scrollbar = None
 
     def run(self):
         pygame.display.set_caption("Level Selection")
-        self.screen.fill(pygame.Color("Black"))
         WHITE = pygame.Color("White")
+        GRAY = pygame.Color("Gray")
         
         if len(self.containers) == 0:
             return
 
-        if len(self.containers) < self.roullettePos:
-            self.roullettePos = [0]
-
-        if self.roullettePos + self.limit > len(self.containers):
-            self.roullettePos -= 1
-            return
-        
+        self.screen.fill(pygame.Color("Black"))
         text_font = pygame.font.Font('freesansbold.ttf', 64)
         text_text = text_font.render(f"SELECT LEVEL", True, WHITE)
         text_box = text_text.get_rect()
@@ -58,6 +54,30 @@ class LevelSelection:
             cont.draw(self.screen)
         self.controls()
 
+        if len(self.containers) < self.roullettePos:
+            self.roullettePos = 0
+
+        if self.roullettePos + self.limit > len(self.containers):
+            self.roullettePos -= 1
+        
+        if self.roullettePos < 0:
+            self.roullettePos = 0
+
+        firstbox = self.containers[self.roullettePos].containerBox
+        scrollbar_h = firstbox.h * self.limit
+        scroll_w = int(0.01*self.window.w)
+        scrollbar = pygame.Rect(0, 0, scroll_w, scrollbar_h)
+        scrollbar.left = firstbox.right + self.margin
+        scrollbar.top = firstbox.top
+        scroll_h = int(scrollbar_h / self.limit) \
+            if self.limit < len(self.containers) \
+            else scrollbar_h
+        scroll = pygame.Rect(0, 0, scroll_w, scroll_h)
+        scroll.centerx = scrollbar.centerx
+        scroll.top = scrollbar.top + scroll.h * self.roullettePos 
+        pygame.draw.rect(self.screen, GRAY, scrollbar)
+        pygame.draw.rect(self.screen, GRAY, scroll)
+
     def controls(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -71,9 +91,9 @@ class LevelSelection:
                 if event.key == pygame.K_UP:
                     self.roullettePos -= 1
             if event.type == pygame.MOUSEWHEEL:
-                if event.precise_Y < 0:
+                if event.precise_y < 0:
                     self.roullettePos += 1
-                if event.precise_Y > 0:
+                if event.precise_y > 0:
                     self.roullettePos -= 1
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
