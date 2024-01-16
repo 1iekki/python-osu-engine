@@ -31,7 +31,7 @@ class LevelSelection:
     def run(self):
         pygame.display.set_caption("Level Selection")
         WHITE = pygame.Color("White")
-        GRAY = pygame.Color("Gray")
+        GRAY = (95, 95, 95)
         
         if len(self.containers) == 0:
             return
@@ -68,15 +68,13 @@ class LevelSelection:
         scroll_w = int(0.01*self.window.w)
         scrollbar = pygame.Rect(0, 0, scroll_w, scrollbar_h)
         scrollbar.left = firstbox.right + self.margin
-        scrollbar.top = firstbox.top
-        scroll_h = int(scrollbar_h / self.limit) \
-            if self.limit < len(self.containers) \
-            else scrollbar_h
+        scrollbar.top = text_box.bottom
+        scroll_h = int(scrollbar_h / len(self.containers))
         scroll = pygame.Rect(0, 0, scroll_w, scroll_h)
         scroll.centerx = scrollbar.centerx
         scroll.top = scrollbar.top + scroll.h * self.roullettePos 
         pygame.draw.rect(self.screen, GRAY, scrollbar)
-        pygame.draw.rect(self.screen, GRAY, scroll)
+        pygame.draw.rect(self.screen, WHITE, scroll)
 
     def controls(self):
         for event in pygame.event.get():
