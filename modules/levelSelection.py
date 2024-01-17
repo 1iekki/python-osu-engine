@@ -25,7 +25,10 @@ class LevelSelection:
         self.beatmaps = beatmap_parser.search("beatmaps")
         self.playMap = playMap
         self.roullettePos = 0
-        self.containers = [Container(bmap) for bmap in self.beatmaps]
+        self.containers = []
+        for bmap in self.beatmaps:
+            if bmap.generalData['Mode'] == '0':
+                self.containers.append(Container(bmap))
         self.conx = int(self.screen.get_width() * 0.5)
         self.cony = int(self.screen.get_height() * 0.15)
         self.scaledconx = int(self.conx * 1.1)
