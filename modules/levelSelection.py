@@ -16,6 +16,12 @@ class LevelSelection:
         self.screen = screen
         self.window = screen.get_rect()
         self.gameState = gameState
+        for file in os.listdir(f"./"):
+            if file.endswith(".osz"):
+                with ZipFile(file) as file:
+                    name = file.filename
+                    name = name[0:-4]
+                    file.extractall(f"beatmaps/{name}")
         self.beatmaps = beatmap_parser.search("beatmaps")
         self.playMap = playMap
         self.roullettePos = 0
@@ -26,9 +32,12 @@ class LevelSelection:
         self.scaledcony = int(self.cony * 1.1)
         for i, cont in enumerate(self.containers):
             cont.set_dimensions(self.conx, self.cony)
+
         self.limit = 5
         self.scroll = None
         self.scrollbar = None
+
+
 
     def run(self):
         pygame.display.set_caption("Level Selection")
