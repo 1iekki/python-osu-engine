@@ -227,9 +227,10 @@ class PlayMap:
         SLIDER_ADVANCES = 1
 
         if self.rendered < len(self.hitObjects):
-            hitTime = self.hitObjects[self.rendered].showTime
+            hit = self.hitObjects[self.rendered]
             self.musicTime = pygame.mixer.music.get_pos()
-            if hitTime <= self.musicTime:         
+            if hit.showTime <= self.musicTime \
+                and not hit.type['SPINNER']:         
                 self.hitQueue.append(self.hitObjects[self.rendered])
                 self.rendered += 1
 
