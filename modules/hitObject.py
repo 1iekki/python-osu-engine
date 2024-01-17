@@ -78,7 +78,7 @@ class HitObject:
                 self.sliderLength = int(float(params[7].strip()))
             timingPtr = timingPoints.index(timingPoints[-1])
             timingReferencePtr = timingPoints.index(timingPoints[-1])
-            for id, point in enumerate(timingPoints[:-2]):
+            for id, point in enumerate(timingPoints[:-1]):
                 if self.hitTime > point[0]:
                     continue
                 if self.hitTime <= timingPoints[id + 1][0]:
@@ -91,6 +91,11 @@ class HitObject:
                             i -= 1
                         timingReferencePtr = i
                     break
+            if timingPoints[timingReferencePtr][1] < 0:
+                i = len(timingPoints) - 1
+                while timingPoints[i][1] < 0:
+                    i -= 1
+                timingReferencePtr = i
             self.beatLength = timingPoints[timingReferencePtr][1]
             if timingPtr == timingReferencePtr:
                 self.SV = 1
@@ -142,5 +147,6 @@ class HitObject:
             return self.curvePath[self.curvePointer]
         else:
             return self.curvePath[-1]
+        
 
 

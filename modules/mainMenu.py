@@ -16,11 +16,9 @@ class MainMenu:
         self.gameState = gameState
         self.startIMG = pygame.image.load("images/start_button.png")
         self.htpIMG = pygame.image.load("images/htp_button.png")
-        self.creditsIMG = pygame.image.load("images/credits_button.png")
         self.quitIMG = pygame.image.load("images/quit_button.png")
         self.startButton = Button(self.startIMG)
         self.htpButton = Button(self.htpIMG)
-        self.creditsButton = Button(self.creditsIMG)
         self.quitButton = Button(self.quitIMG)
         self.titleIMG = pygame.image.load("images/title.png")
         self.title_box = self.titleIMG.get_rect()
@@ -34,14 +32,11 @@ class MainMenu:
                     self.title_box.bottom + MARGIN + buttonHeight)
         htpPos = (startPos[0], 
                   startPos[1] + MARGIN + buttonHeight)
-        creditsPos = (htpPos[0], 
+        quitPos = (htpPos[0], 
                       htpPos[1] + MARGIN + buttonHeight)
-        quitPos = (creditsPos[0], 
-                   creditsPos[1] + MARGIN + buttonHeight)
         
         self.startButton.set_pos(startPos)
         self.htpButton.set_pos(htpPos)
-        self.creditsButton.set_pos(creditsPos)
         self.quitButton.set_pos(quitPos)
 
 
@@ -56,12 +51,10 @@ class MainMenu:
         self.screen.blit(self.titleIMG, self.title_box)
         self.startButton.draw(self.screen)
         self.htpButton.draw(self.screen)
-        self.creditsButton.draw(self.screen)
         self.quitButton.draw(self.screen)
 
         self.startButton.onClick(self.gameState.set_state, "LevelSelection")
         self.htpButton.onClick(self.gameState.set_state, "HowTo")
-        self.creditsButton.onClick(self.gameState.set_state, "Credits")
         self.quitButton.onClick(self.quit)
         self.controls()
 

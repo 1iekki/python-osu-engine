@@ -1,5 +1,7 @@
 import pygame
 import sys
+import os
+from zipfile import ZipFile
 from modules.gameStateManager import GameStateManager
 from modules.playMap import PlayMap
 from modules.container import Container
@@ -75,6 +77,17 @@ class LevelSelection:
         scroll.top = scrollbar.top + scroll.h * self.roullettePos 
         pygame.draw.rect(self.screen, GRAY, scrollbar)
         pygame.draw.rect(self.screen, WHITE, scroll)
+
+    def load_maps(self):
+        for map in os.listdir("./"):
+            if map.endswith(".osz"):
+                try:
+                    with ZipFile(map) as file:
+                        name = file.filename
+                        name = name[0:-4]
+                        file.extractall(f"beatmaps/{name}")
+                except:
+                    continue
 
     def controls(self):
         for event in pygame.event.get():

@@ -10,14 +10,11 @@ class Beatmap:
         self.dir = dir
         self.name = name
         with open(f"{dir}/{name}", mode = 'r', encoding='utf_8') as file:
-            try:
-                lines = file.readlines()
-                self.generalData = self.get_data("[General]\n", lines)
-                self.metadata = self.get_data("[Metadata]\n", lines)
-                self.difficulty = self.get_data("[Difficulty]\n", lines)
-                self.timingPoints = self.get_timing("[TimingPoints]\n", lines)
-            except:
-                pass    
+            lines = file.readlines()
+            self.generalData = self.get_data("[General]\n", lines)
+            self.metadata = self.get_data("[Metadata]\n", lines)
+            self.difficulty = self.get_data("[Difficulty]\n", lines)
+            self.timingPoints = self.get_timing("[TimingPoints]\n", lines)  
         CS = float(self.difficulty['CircleSize'])
         self.circleSize = CIRCLE_SIZE - CIRCLE_SCALE * CS
 

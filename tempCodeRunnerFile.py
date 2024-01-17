@@ -1,2 +1,2 @@
 
-    game.run()
+def main():
