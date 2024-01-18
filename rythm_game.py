@@ -1,3 +1,8 @@
+'''
+Main executable file for ryth game Click!
+Made by Eryk Dudkiewicz
+'''
+
 from modules.game import Game
 
 def main():

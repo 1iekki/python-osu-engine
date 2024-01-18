@@ -1,3 +1,9 @@
+'''
+Module containing game class
+Game class is resposible for initializing used classes,
+and managing which class runs at a given moment
+'''
+
 import pygame
 import pickle
 from modules.cursor import Cursor
@@ -42,6 +48,10 @@ class Game:
                       }
 
     def run(self):
+        '''
+        Main loop, runs the methods of classes corresponding
+        to different gamestates.
+        '''
         self.gameState.set_state("MainMenu")
         while True:
             # dont place any code here, any changes should be made

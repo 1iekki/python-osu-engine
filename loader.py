@@ -1,3 +1,8 @@
+'''
+This script can be used to manually load beatmaps into the game
+It should not be needed.
+'''
+
 import sys
 from zipfile import ZipFile
 

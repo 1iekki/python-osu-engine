@@ -1,3 +1,7 @@
+'''
+This is a script for creating a settings file used by the game
+'''
+
 import pickle
 import pygame
 
