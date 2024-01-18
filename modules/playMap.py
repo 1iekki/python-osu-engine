@@ -54,7 +54,6 @@ class PlayMap:
         self.hit300 = 0
         self.miss = 0
         self.all = 0
-        self.soundChannel.set_volume(0.3)
         self.frontRow = self.screen.copy()
         self.backRow = self.screen.copy()
         self.backRow.convert_alpha()
@@ -66,6 +65,8 @@ class PlayMap:
         self.currentsurf = self.backRow
         self.mousePos = None
         self.scoreQueue = []
+        self.musicVolume = settings['MUSIC_VOLUME']
+        self.soundVolume = settings['SOUND_VOLUME']
 
     def reset_vars(self):
         
@@ -140,6 +141,8 @@ class PlayMap:
         pygame.mixer.music.play()
         pygame.mixer.music.set_pos(0)
         pygame.mixer.music.set_volume(0.1)
+        self.soundChannel.set_volume(self.musicVolume)
+        self.soundChannel2.set_volume(self.soundVolume)
         while pygame.mixer.music.get_busy():
             self.render_objects()
             self.get_inputs()

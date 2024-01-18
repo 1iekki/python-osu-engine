@@ -29,7 +29,8 @@ class HitObject:
         self.sliderTime = 0
         self.sliderRuns = False
         
-        AR = float(difficulty["ApproachRate"])
+        AR = float(difficulty["ApproachRate"]) \
+            if "ApproachRate" in difficulty.keys() else 5
         if AR < 5:
             self.preempt = int(PREEMPT + (LOW_AR_PREEMPT * (5 - AR) / 5))
             self.fadeIn = int(FADE_IN + (LOW_AR_FADE * (5 - AR) / 5))
@@ -108,7 +109,8 @@ class HitObject:
             self.ticks = 0
             self.sliderClicked = False
             
-        OD = float(difficulty['OverallDifficulty'])
+        OD = float(difficulty['OverallDifficulty']) \
+            if 'OverallDifficulty' in difficulty.keys() else 5
         self.hitWindow = {'300': int(80 - 6 * OD),
                           '100': int(140 - 8 * OD),
                           '50': int(200 - 10 * OD)
