@@ -91,7 +91,8 @@ class LevelSelection:
         scrollbar = pygame.Rect(0, 0, scroll_w, scrollbar_h)
         scrollbar.left = firstbox.right + self.margin
         scrollbar.top = text_box.bottom
-        scroll_h = int(scrollbar_h / len(self.containers))
+        scroll_h = scrollbar_h if len(self.containers) < self.limit \
+            else int(scrollbar_h / len(self.containers))
         scroll = pygame.Rect(0, 0, scroll_w, scroll_h)
         scroll.centerx = scrollbar.centerx
         scroll.top = scrollbar.top + scroll.h * self.roullettePos 

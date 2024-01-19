@@ -160,6 +160,9 @@ class PlayMap:
         self.soundChannel.set_volume(self.musicVolume)
         self.soundChannel2.set_volume(self.soundVolume)
         while pygame.mixer.music.get_busy():
+            if self.rendered == len(self.hitObjects) \
+                and len(self.hitQueue) == 0:
+                pygame.mixer.music.stop()
             self.render_objects()
             self.get_inputs()
             self.show_score()
@@ -262,6 +265,8 @@ class PlayMap:
             if hit.showTime <= self.musicTime \
                 and not hit.type['SPINNER']:         
                 self.hitQueue.append(self.hitObjects[self.rendered])
+                self.rendered += 1
+            if hit.type['SPINNER']:
                 self.rendered += 1
 
         self.screen.fill(pygame.Color("Black"))
@@ -420,7 +425,7 @@ class PlayMap:
             info1_box.top = text_box.bottom
 
             info2_font = pygame.font.Font('freesansbold.ttf', 36)
-            info2_text = info2_font.render(f"Accuracy: {self.acc}", 
+            info2_text = info2_font.render(f"Accuracy: {self.acc:.2f}%", 
                                            True, WHITE)
             info2_box = info2_text.get_rect()
             info2_box.centerx = self.window.centerx

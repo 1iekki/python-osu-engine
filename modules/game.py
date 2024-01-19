@@ -39,7 +39,7 @@ class Game:
         self.levelSelection = LevelSelection(self.screen,
                                              self.gameState, self.playMap)
         self.askQuit = AskQuit(self.screen, self.gameState)
-        self.howTo = HowToScreen()
+        self.howTo = HowToScreen(self.screen, self.gameState)
         self.STATES = {"MainMenu": self.mainMenu,
                        "LevelSelection": self.levelSelection,
                        "PlayMap": self.playMap,
