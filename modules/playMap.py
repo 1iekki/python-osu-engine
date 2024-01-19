@@ -1,3 +1,8 @@
+'''
+This module is a panel with the main gameplay.
+Beatmap must be set before calling the run method.
+'''
+
 import pygame
 import sys
 from modules.gameStateManager import GameStateManager
@@ -69,6 +74,9 @@ class PlayMap:
         self.soundVolume = settings['SOUND_VOLUME']
 
     def reset_vars(self):
+        '''
+        Resets the variables, so that the map can be played again.
+        '''
         
         self.map = None
         self.hitObjects = None
@@ -91,6 +99,9 @@ class PlayMap:
 
 
     def set_map(self, map: Beatmap):
+        '''
+        Sets a specified map to be played.
+        '''
         
         SLIDER_BALL_SCALE = 2
 
@@ -127,6 +138,11 @@ class PlayMap:
                             300: pygame.image.load("images/hit300.png")}
 
     def run(self):
+        '''
+        Runs the panel.
+        This methods stops the execution of the main loop
+        until the map is finished or until the player leaves
+        '''
         
         pygame.display.set_caption(
             f"Playing: {self.map.name}")
@@ -155,6 +171,10 @@ class PlayMap:
 
     
     def render_hitcircle(self, hit):
+        '''
+        Method responsible for rendering a hitcircle on the screen
+        '''
+
         x = hit.x * self.scale_factor
         y = hit.y * self.scale_factor
         x += self.pos_x
@@ -199,6 +219,9 @@ class PlayMap:
         hit.hitbox = img_box
 
     def show_score(self):
+        '''
+        Method used for displaying the score on the screen.
+        '''
 
         score_font = pygame.font.Font('freesansbold.ttf', 48)
         score_text = score_font.render(f"SCORE: {self.score}", True, pygame.color.Color("White"))
@@ -224,6 +247,10 @@ class PlayMap:
         self.frontRow.blit(acc_text, acc_box)
 
     def render_objects(self):
+        '''
+        Method responsible for managing which objects should be rendered,
+        as well as controling the sliders.
+        '''
         
         SLIDER_END = 0
         SLIDER_BOUNCES = 2
@@ -368,6 +395,11 @@ class PlayMap:
             obj.draw(self.frontRow)
 
     def final_screen(self):
+        '''
+        Method responsible for displaying the final screen 
+        after completing the map.
+        '''
+
         BLACK = pygame.Color("Black")
         WHITE = pygame.Color("White")
         pygame.mixer.music.pause()
@@ -454,6 +486,10 @@ class PlayMap:
             pygame.display.flip()
 
     def pause(self):
+        '''
+        Method for pausing the game and displaying the pause screen.
+        '''
+
         BLACK = pygame.Color("Black")
         WHITE = pygame.Color("White")
         PAUSE_ALPHA = 100
@@ -513,6 +549,10 @@ class PlayMap:
             pygame.display.flip()
     
     def score_lookup(self) -> bool:
+        '''
+        This method manages the score by calling
+        the hit evaluation method as well as modifying the score
+        '''
 
         scored = self.eval_hits()
         if scored == -1: 
@@ -529,6 +569,11 @@ class PlayMap:
         return False
     
     def get_inputs(self):
+        '''
+        Gets the inputs the user has entered and calls
+        score managing method.
+        '''
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -556,6 +601,10 @@ class PlayMap:
                     self.clicked["INPUT_KEY_2"] = False
 
     def eval_slider_end(self, hit) -> int:
+        '''
+        Evaluates the score at the end of the slider.
+        '''
+
         self.soundChannel.play(self.sounds['hitnormal'])
         pos = pygame.mouse.get_pos()
         collision = hit.hitbox.collidepoint(pos)
@@ -620,6 +669,10 @@ class PlayMap:
         return 0
 
     def create_score_obj(self, value, position):
+        '''
+        Creates a score confirmation object to be displayed
+        on the screen and adds it to the queue.
+        '''
         
         img = self.scoreImages[value]
         img_box = img.get_rect()
@@ -629,6 +682,11 @@ class PlayMap:
 
 
     def eval_hits(self) -> int:
+        '''
+        Hit evaluation method. Checks whether the user clicked
+        at the right time and on a right circle.
+        '''
+
         self.musicTime = pygame.mixer.music.get_pos()
         cursorPos = pygame.mouse.get_pos()
         if len(self.hitQueue) < 1:

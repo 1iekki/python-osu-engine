@@ -1,3 +1,8 @@
+'''
+A module containing score confirmation objects,
+that appear on screen
+'''
+
 import pygame
 
 class ScoreObject:
@@ -11,6 +16,9 @@ class ScoreObject:
         self.disappearTime = appearTime + duration
 
     def draw(self, screen: pygame.Surface):
+        '''
+        Draw the object on surface
+        '''
         musicTime = pygame.mixer.music.get_pos()
         relTime = musicTime - self.appearTime
         fadeOUT = relTime/float(self.duration)

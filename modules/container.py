@@ -1,3 +1,8 @@
+'''
+Module containing container objects which display the map
+description in the level selector panel.
+'''
+
 import pygame
 from modules.beatmap import Beatmap
 
@@ -9,17 +14,29 @@ class Container:
         self.mainFontSize = int(self.containerBox.h / 8)
         self.secondaryFontSize = int(self.containerBox.h / 10)
     
-    def set_dimensions(self, x: int, y: int):
+    def set_dimensions(self, x: int, y: int) -> None:
+        '''
+        Set dimensions of the container
+        '''
+        
         self.containerIMG = pygame.transform.smoothscale(
             self.containerIMG, (x, y))
         self.containerBox = self.containerIMG.get_rect()
         self.mainFontSize = int(self.containerBox.h / 8)
         self.secondaryFontSize = int(self.containerBox.h / 10)
     
-    def set_pos(self, x: int, y: int):
+    def set_pos(self, x: int, y: int) -> None:
+        '''
+        Set the posistion of the container
+        '''
+        
         self.containerBox.center = (x, y)
     
-    def draw(self, screen: pygame.Surface):
+    def draw(self, screen: pygame.Surface) -> None:
+        '''
+        Draw the container on a surface.
+        '''
+        
         WHITE = pygame.Color("White")
 
         title_font = pygame.font.Font('freesansbold.ttf', 

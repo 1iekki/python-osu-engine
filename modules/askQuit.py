@@ -1,3 +1,7 @@
+'''
+Module for a panel asking a user whether he wants to quit the game
+'''
+
 import pygame    
 import sys
 from modules.gameStateManager import GameStateManager
@@ -8,6 +12,9 @@ class AskQuit:
         self.window = self.screen.get_rect()
         self.gameState = gameState
     def run(self):
+        '''
+        Method used to call this panel in the main loop
+        '''
         BLACK = pygame.Color("Black")
         WHITE = pygame.Color("White")
 
@@ -37,6 +44,9 @@ class AskQuit:
         self.controls()
 
     def controls(self):
+        '''
+        Controls for the panel
+        '''
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()

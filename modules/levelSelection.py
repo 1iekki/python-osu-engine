@@ -1,3 +1,7 @@
+'''
+Module containing level selection panel.
+'''
+
 import pygame
 import sys
 import os
@@ -43,6 +47,10 @@ class LevelSelection:
 
 
     def run(self):
+        '''
+        Run method dispalys the panel on the screen.
+        '''
+        
         pygame.display.set_caption("Level Selection")
         WHITE = pygame.Color("White")
         GRAY = (95, 95, 95)
@@ -91,6 +99,11 @@ class LevelSelection:
         pygame.draw.rect(self.screen, WHITE, scroll)
 
     def load_maps(self):
+        '''
+        Loads the maps from the main directory.
+        It is called only when initializing the class.
+        '''
+        
         for map in os.listdir("./"):
             if map.endswith(".osz"):
                 try:
@@ -102,6 +115,10 @@ class LevelSelection:
                     continue
 
     def controls(self):
+        '''
+        Method responsible for handling user inputs.
+        '''
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()

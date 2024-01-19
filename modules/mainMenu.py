@@ -1,11 +1,13 @@
+'''
+Module responsible for displaying the main menu panel.
+'''
+
 import pygame
 import sys
 from modules.gameStateManager import GameStateManager
 from modules.buttons import Button
 
 class MainMenu:
-    
-    
     def __init__(self, screen: pygame.Surface, gameState: GameStateManager):
 
         MARGIN = 20
@@ -41,6 +43,10 @@ class MainMenu:
 
 
     def run(self):
+        '''
+        Run method displays the panel on the screen.
+        '''
+        
         MARGIN = 30
 
         BLACK = pygame.Color("Black")
@@ -59,10 +65,18 @@ class MainMenu:
         self.controls()
 
     def quit(self):
+        '''
+        Quit the program.
+        '''
+        
         pygame.quit()
         sys.exit()
 
     def controls(self):
+        '''
+        Method for handling the inputs the user is making.
+        '''
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 quit()

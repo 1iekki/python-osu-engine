@@ -1,7 +1,11 @@
+'''
+Module containing hit object class.
+It is resposnible for holding essential information
+on object that need to be rendered. 
+'''
+
 from modules.curves import Curve
 class HitObject:
-   
-
     def __init__(self, description: str, difficulty: dict, timingPoints: list):
 
         # constants
@@ -117,14 +121,28 @@ class HitObject:
                           }
 
     def get_slider_path(self) -> list:
+        '''
+        Returns a list of points on the slider path
+        '''
         return self.curvePath
 
-    def generate_slider_path(self, scale_factor, posx, posy):
+    def generate_slider_path(self, scale_factor, posx, posy) -> None:
+        '''
+        Generates a path on a curve, specified by curve points declared
+        in the beatmap file
+        '''
         self.curve = Curve(self.sliderCurvePoints)
         self.curvePath = self.curve.get_bezier_path(scale_factor, posx, posy)
         self.curvePathCount = len(self.curvePath)
 
-    def advance_slider(self, Time) -> bool:
+    def advance_slider(self, Time) -> int:
+        '''
+        Advances slider to a next point or return one of flags:
+        -1: Object is not a slider
+        0: Slider has ended
+        1: Slider advanced successfully
+        2: Slider reached a bounce point and is now reversed
+        '''
         
         Time -= self.sliderTime * (self.slidesPerformed)
 
@@ -145,6 +163,9 @@ class HitObject:
         return 1 # OK
 
     def get_slider_phase(self) -> list:
+        '''
+        Gets a point at which the slider currently is
+        '''
         if self.curvePointer < self.curvePathCount:
             return self.curvePath[self.curvePointer]
         else:

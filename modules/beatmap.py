@@ -1,3 +1,8 @@
+'''
+Module containing the beatmap object, holding all
+the general information about a beatmap
+'''
+
 from modules.hitObject import HitObject
 
 class Beatmap:
@@ -19,6 +24,9 @@ class Beatmap:
         self.circleSize = CIRCLE_SIZE - CIRCLE_SCALE * CS
 
     def get_timing(self, what: str, where: list):
+        '''
+        Gets the timing points in a map
+        '''
         a = []
         id = where.index(what)
         end = where.index("\n", id)
@@ -27,6 +35,9 @@ class Beatmap:
         return a
 
     def get_data(self, what: str, where: list) -> dict:
+        '''
+        Gets a specified type of data from a beatmap file
+        '''
         d ={}
         id = where.index(what)
         end = where.index("\n", id)
@@ -36,6 +47,11 @@ class Beatmap:
         return d
 
     def get_hitobjects(self) -> list:
+        '''
+        Creates hit objects from the beatmap file.
+        This function should be used after loading a map, since it requires
+        a lot of memory to hold the objects.
+        '''
         hit = []
         with open(f"{self.dir}/{self.name}", mode='r', encoding='utf_8') as file:
             lines = file.readlines()
@@ -45,6 +61,9 @@ class Beatmap:
         return hit
     
     def get_audio(self) -> str:
+        '''
+        Returns the path to audio file.
+        '''
         return f"{self.dir}/{self.generalData['AudioFilename']}"
 
     def __repr__(self) -> str:

@@ -1,7 +1,15 @@
+'''
+Module for parsing the beatmap file
+'''
+
 import os
 from modules.beatmap import Beatmap
 
 def search(dir : str) -> list:
+    '''
+    Search for maps in a directory,
+    Returns a lits of maps
+    '''
     beatmaps = []
     for map in os.listdir(dir):
         for file in os.listdir(f"{dir}/{map}"):
