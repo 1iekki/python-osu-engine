@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module playMap</title>
+</head><body>
+
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title">playMap</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Ceryk%5Cdesktop%5Cpyosu%5Cplaymap.py">c:\users\eryk\desktop\pyosu\playmap.py</a></td></tr></table>
+    <p><span class="code">This&nbsp;module&nbsp;is&nbsp;a&nbsp;panel&nbsp;with&nbsp;the&nbsp;main&nbsp;gameplay.<br>
+Beatmap&nbsp;must&nbsp;be&nbsp;set&nbsp;before&nbsp;calling&nbsp;the&nbsp;run&nbsp;method.</span></p>
+<p>
+<table class="section">
+<tr class="decor pkg-content-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
+    
+<tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="pygame.html">pygame</a><br>
+</td><td class="multicolumn"><a href="sys.html">sys</a><br>
+</td><td class="multicolumn"></td><td class="multicolumn"></td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor index-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Classes</strong></td></tr>
+    
+<tr><td class="decor index-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl>
+<dt class="heading-text"><a href="builtins.html#object">builtins.object</a>
+</dt><dd>
+<dl>
+<dt class="heading-text"><a href="playMap.html#PlayMap">PlayMap</a>
+</dt></dl>
+</dd>
+</dl>
+ <p>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="PlayMap">class <strong>PlayMap</strong></a>(<a href="builtins.html#object">builtins.object</a>)</td></tr>
+    
+<tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
+<td class="decor title-decor" colspan=2><span class="code"><a href="#PlayMap">PlayMap</a>(screen:&nbsp;pygame.surface.Surface,&nbsp;gameState:&nbsp;gameStateManager.GameStateManager,&nbsp;clock:&nbsp;pygame.time.Clock,&nbsp;settings:&nbsp;dict,&nbsp;cursor:&nbsp;cursor.Cursor)<br>
+&nbsp;<br>
+<br>&nbsp;</span></td></tr>
+<tr><td>&nbsp;</td>
+<td class="singlecolumn">Methods defined here:<br>
+<dl><dt><a name="PlayMap-__init__"><strong>__init__</strong></a>(self, screen: pygame.surface.Surface, gameState: gameStateManager.GameStateManager, clock: pygame.time.Clock, settings: dict, cursor: cursor.Cursor)</dt><dd><span class="code">Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</span></dd></dl>
+
+<dl><dt><a name="PlayMap-create_score_obj"><strong>create_score_obj</strong></a>(self, value, position)</dt><dd><span class="code">Creates&nbsp;a&nbsp;score&nbsp;confirmation&nbsp;<a href="builtins.html#object">object</a>&nbsp;to&nbsp;be&nbsp;displayed<br>
+on&nbsp;the&nbsp;screen&nbsp;and&nbsp;adds&nbsp;it&nbsp;to&nbsp;the&nbsp;queue.</span></dd></dl>
+
+<dl><dt><a name="PlayMap-eval_hits"><strong>eval_hits</strong></a>(self) -&gt; int</dt><dd><span class="code">Hit&nbsp;evaluation&nbsp;method.&nbsp;Checks&nbsp;whether&nbsp;the&nbsp;user&nbsp;clicked<br>
+at&nbsp;the&nbsp;right&nbsp;time&nbsp;and&nbsp;on&nbsp;a&nbsp;right&nbsp;circle.</span></dd></dl>
+
+<dl><dt><a name="PlayMap-eval_slider_end"><strong>eval_slider_end</strong></a>(self, hit) -&gt; int</dt><dd><span class="code">Evaluates&nbsp;the&nbsp;score&nbsp;at&nbsp;the&nbsp;end&nbsp;of&nbsp;the&nbsp;slider.</span></dd></dl>
+
+<dl><dt><a name="PlayMap-final_screen"><strong>final_screen</strong></a>(self)</dt><dd><span class="code">Method&nbsp;responsible&nbsp;for&nbsp;displaying&nbsp;the&nbsp;final&nbsp;screen&nbsp;<br>
+after&nbsp;completing&nbsp;the&nbsp;map.</span></dd></dl>
+
+<dl><dt><a name="PlayMap-get_inputs"><strong>get_inputs</strong></a>(self)</dt><dd><span class="code">Gets&nbsp;the&nbsp;inputs&nbsp;the&nbsp;user&nbsp;has&nbsp;entered&nbsp;and&nbsp;calls<br>
+score&nbsp;managing&nbsp;method.</span></dd></dl>
+
+<dl><dt><a name="PlayMap-pause"><strong>pause</strong></a>(self)</dt><dd><span class="code">Method&nbsp;for&nbsp;pausing&nbsp;the&nbsp;game&nbsp;and&nbsp;displaying&nbsp;the&nbsp;pause&nbsp;screen.</span></dd></dl>
+
+<dl><dt><a name="PlayMap-render_hitcircle"><strong>render_hitcircle</strong></a>(self, hit)</dt><dd><span class="code">Method&nbsp;responsible&nbsp;for&nbsp;rendering&nbsp;a&nbsp;hitcircle&nbsp;on&nbsp;the&nbsp;screen</span></dd></dl>
+
+<dl><dt><a name="PlayMap-render_objects"><strong>render_objects</strong></a>(self)</dt><dd><span class="code">Method&nbsp;responsible&nbsp;for&nbsp;managing&nbsp;which&nbsp;objects&nbsp;should&nbsp;be&nbsp;rendered,<br>
+as&nbsp;well&nbsp;as&nbsp;controling&nbsp;the&nbsp;sliders.</span></dd></dl>
+
+<dl><dt><a name="PlayMap-reset_vars"><strong>reset_vars</strong></a>(self)</dt><dd><span class="code">Resets&nbsp;the&nbsp;variables,&nbsp;so&nbsp;that&nbsp;the&nbsp;map&nbsp;can&nbsp;be&nbsp;played&nbsp;again.</span></dd></dl>
+
+<dl><dt><a name="PlayMap-run"><strong>run</strong></a>(self)</dt><dd><span class="code">Runs&nbsp;the&nbsp;panel.<br>
+This&nbsp;methods&nbsp;stops&nbsp;the&nbsp;execution&nbsp;of&nbsp;the&nbsp;main&nbsp;loop<br>
+until&nbsp;the&nbsp;map&nbsp;is&nbsp;finished&nbsp;or&nbsp;until&nbsp;the&nbsp;player&nbsp;leaves</span></dd></dl>
+
+<dl><dt><a name="PlayMap-score_lookup"><strong>score_lookup</strong></a>(self) -&gt; bool</dt><dd><span class="code">This&nbsp;method&nbsp;manages&nbsp;the&nbsp;score&nbsp;by&nbsp;calling<br>
+the&nbsp;hit&nbsp;evaluation&nbsp;method&nbsp;as&nbsp;well&nbsp;as&nbsp;modifying&nbsp;the&nbsp;score</span></dd></dl>
+
+<dl><dt><a name="PlayMap-set_map"><strong>set_map</strong></a>(self, map: beatmap.Beatmap)</dt><dd><span class="code">Sets&nbsp;a&nbsp;specified&nbsp;map&nbsp;to&nbsp;be&nbsp;played.</span></dd></dl>
+
+<dl><dt><a name="PlayMap-show_score"><strong>show_score</strong></a>(self)</dt><dd><span class="code">Method&nbsp;used&nbsp;for&nbsp;displaying&nbsp;the&nbsp;score&nbsp;on&nbsp;the&nbsp;screen.</span></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
+</dl>
+</td></tr></table></td></tr></table>
+</body></html>

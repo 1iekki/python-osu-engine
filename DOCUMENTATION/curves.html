@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module curves</title>
+</head><body>
+
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title">curves</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Ceryk%5Cdesktop%5Cpyosu%5Ccurves.py">c:\users\eryk\desktop\pyosu\curves.py</a></td></tr></table>
+    <p><span class="code">Module&nbsp;resposible&nbsp;for&nbsp;holding&nbsp;<a href="#Curve">Curve</a>&nbsp;class&nbsp;that&nbsp;holds&nbsp;information<br>
+about&nbsp;the&nbsp;slider&nbsp;curve,&nbsp;as&nbsp;well&nbsp;as&nbsp;having&nbsp;functions&nbsp;to&nbsp;calculate&nbsp;the&nbsp;curve.</span></p>
+<p>
+<table class="section">
+<tr class="decor pkg-content-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
+    
+<tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="pygame.html">pygame</a><br>
+</td><td class="multicolumn"></td><td class="multicolumn"></td><td class="multicolumn"></td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor index-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Classes</strong></td></tr>
+    
+<tr><td class="decor index-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl>
+<dt class="heading-text"><a href="builtins.html#object">builtins.object</a>
+</dt><dd>
+<dl>
+<dt class="heading-text"><a href="curves.html#Curve">Curve</a>
+</dt></dl>
+</dd>
+</dl>
+ <p>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="Curve">class <strong>Curve</strong></a>(<a href="builtins.html#object">builtins.object</a>)</td></tr>
+    
+<tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
+<td class="decor title-decor" colspan=2><span class="code"><a href="#Curve">Curve</a>(control_points:&nbsp;list,&nbsp;divisions:&nbsp;int&nbsp;=&nbsp;120)&nbsp;-&amp;gt;&nbsp;None<br>
+&nbsp;<br>
+<br>&nbsp;</span></td></tr>
+<tr><td>&nbsp;</td>
+<td class="singlecolumn">Methods defined here:<br>
+<dl><dt><a name="Curve-__init__"><strong>__init__</strong></a>(self, control_points: list, divisions: int = 120) -&gt; None</dt><dd><span class="code">Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</span></dd></dl>
+
+<dl><dt><a name="Curve-get_bezier_path"><strong>get_bezier_path</strong></a>(self, scale_factor, pos_x, pos_y) -&gt; list</dt><dd><span class="code">Returns&nbsp;a&nbsp;path&nbsp;of&nbsp;the&nbsp;curve&nbsp;scaled&nbsp;and&nbsp;placed&nbsp;in&nbsp;the&nbsp;playfield.</span></dd></dl>
+
+<dl><dt><a name="Curve-get_points"><strong>get_points</strong></a>(self) -&gt; list</dt><dd><span class="code">Generates&nbsp;points&nbsp;on&nbsp;a&nbsp;curve&nbsp;by&nbsp;calling&nbsp;curve&nbsp;generation&nbsp;functions.</span></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
+    
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-bezier_curve"><strong>bezier_curve</strong></a>(control_points, number_of_curve_points) -&gt; list</dt><dd><span class="code">Generates&nbsp;a&nbsp;bezier&nbsp;curve&nbsp;from&nbsp;control&nbsp;points&nbsp;and&nbsp;returns&nbsp;a&nbsp;list<br>
+of&nbsp;points&nbsp;on&nbsp;a&nbsp;curve</span></dd></dl>
+ <dl><dt><a name="-bezier_point"><strong>bezier_point</strong></a>(control_points, t)</dt><dd><span class="code">Helper&nbsp;function&nbsp;for&nbsp;generating&nbsp;bezier&nbsp;curve</span></dd></dl>
+</td></tr></table>
+</body></html>
