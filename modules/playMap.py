@@ -163,6 +163,7 @@ class PlayMap:
             if self.rendered == len(self.hitObjects) \
                 and len(self.hitQueue) == 0:
                 pygame.mixer.music.stop()
+                continue
             self.render_objects()
             self.get_inputs()
             self.show_score()
