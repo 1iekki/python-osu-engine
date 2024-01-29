@@ -56,6 +56,14 @@ class LevelSelection:
         GRAY = (95, 95, 95)
         
         if len(self.containers) == 0:
+            self.screen.fill(pygame.Color("Black"))
+            text_font = pygame.font.Font('freesansbold.ttf', 64)
+            text_text = text_font.render(f"NO BEATMAPS DETECTED", True, WHITE)
+            text_box = text_text.get_rect()
+            text_box.centerx = self.window.centerx
+            text_box.top = self.window.top
+            self.screen.blit(text_text, text_box)
+            self.controls()
             return
 
         self.screen.fill(pygame.Color("Black"))
@@ -124,6 +132,12 @@ class LevelSelection:
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+
+            if len(self.containers) == 0:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        self.gameState.set_state("MainMenu")
+                return
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.gameState.set_state("MainMenu")

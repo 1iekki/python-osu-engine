@@ -1,5 +1,5 @@
 '''
-Main executable file for ryth game Click!
+Main executable file for rythm game Click!
 Made by Eryk Dudkiewicz
 '''
 
