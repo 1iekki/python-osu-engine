@@ -5,5 +5,4 @@
  Importing maps is made automatically on game start, or can be done manually by calling the loader.py script with the name of a beatmap file as argv.
  The settings are stored in the settings.pkl file in ./bin folder, they can be changed by changing values in the hashmap of settings.py and running the script (I did not have time to implement settings screen :c ).
  This project was made as a final project for one of my univeristy classes.
- Use this however you want :D
 
