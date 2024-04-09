@@ -3,11 +3,9 @@
 This is a clone of Osu! rythm game made using python with pygame library.
 
 ##  Demo
-
+![demo](https://github.com/1iekki/python-osu-engine/blob/main/assets/demo.gif)
 A demo of the game.
-<video width="640" height="360" controls>
-  <source src="assets/demo.mp4" type="video/mp4">
-</video>
+
 
 ## 🔧 Requirements and Installation
 
