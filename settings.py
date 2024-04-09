@@ -5,8 +5,8 @@ This is a script for creating a settings file used by the game
 import pickle
 import pygame
 
-SETUP = {"SCREEN_RESOLUTION": (1280, 720),
-             "SCREEN_FLAGS": pygame.SHOWN,
+SETUP = {"SCREEN_RESOLUTION": (1920, 1080),
+             "SCREEN_FLAGS": pygame.FULLSCREEN,
              "FPS_CAP": 999,
              "PLAYFIELD_DIMENSIONS": (640,480),
              "PLAYFIELD_MARGIN": 60,
